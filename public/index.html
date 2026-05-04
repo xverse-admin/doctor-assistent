@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Amy – Dr. Smith's Assistant</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2563eb;--blue-dark:#1d4ed8;--blue-light:#dbeafe;--blue-faint:#eff6ff;
+  --green:#10b981;--amber:#f59e0b;--red:#ef4444;--purple:#7c3aed;
+  --bg:#f0f4ff;--surface:#fff;--border:#e2e8f0;
+  --text:#1e293b;--muted:#64748b;--shadow:0 4px 24px rgba(0,0,0,.09);
+  --r:18px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--bg);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px 12px 40px}
+
+/* ── Layout ─────────────────────────────────────────── */
+.wrap{width:100%;max-width:960px;display:flex;flex-direction:column;gap:14px}
+
+/* ── Header ──────────────────────────────────────────── */
+.hdr{background:linear-gradient(135deg,var(--blue) 0%,var(--purple) 100%);
+  border-radius:var(--r);padding:22px 28px;display:flex;align-items:center;gap:14px;color:#fff;box-shadow:var(--shadow)}
+.hdr-icon{font-size:2.2rem;line-height:1}
+.hdr h1{font-size:1.3rem;font-weight:800}
+.hdr p{font-size:.83rem;opacity:.85;margin-top:2px}
+.hdr-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600}
+.hdr-status::before{content:'';width:9px;height:9px;border-radius:50%;background:#4ade80;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── Nav tabs ────────────────────────────────────────── */
+.nav{display:flex;gap:6px;background:var(--surface);border-radius:14px;padding:6px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.nav-btn{flex:1;padding:9px 6px;border:none;border-radius:10px;background:transparent;
+  cursor:pointer;font-size:.83rem;font-weight:600;color:var(--muted);transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:3px}
+.nav-btn .nb-icon{font-size:1.2rem}
+.nav-btn.active{background:var(--blue);color:#fff;box-shadow:0 2px 10px rgba(37,99,235,.35)}
+.nav-btn:not(.active):hover{background:var(--blue-faint);color:var(--blue)}
+
+/* ── Panels ──────────────────────────────────────────── */
+.panel{display:none}
+.panel.active{display:flex;flex-direction:column;gap:14px}
+
+/* ── Session bar ─────────────────────────────────────── */
+.sbar{background:var(--surface);border-radius:12px;padding:11px 18px;
+  display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--muted);box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.sbar strong{color:var(--text)}
+.sid{font-family:monospace;font-size:.78rem;color:var(--blue);background:var(--blue-faint);
+  padding:2px 8px;border-radius:6px}
+.sbar-actions{margin-left:auto;display:flex;gap:6px}
+.pill-btn{padding:5px 13px;border-radius:8px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;transition:all .15s}
+.pill-btn.primary{background:var(--blue);color:#fff}
+.pill-btn.primary:hover{background:var(--blue-dark)}
+.pill-btn.outline{background:var(--blue-light);color:var(--blue)}
+.pill-btn.outline:hover{background:#bfdbfe}
+.pill-btn.danger{background:#fee2e2;color:var(--red)}
+.pill-btn.danger:hover{background:#fecaca}
+
+/* ── Chat card ───────────────────────────────────────── */
+.chat-card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;overflow:hidden;height:480px}
+.msgs{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.msgs::-webkit-scrollbar{width:4px}
+.msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
+
+/* bubbles */
+.msg{display:flex;gap:9px;max-width:84%}
+.msg.user{flex-direction:row-reverse;align-self:flex-end}
+.msg.amy{align-self:flex-start}
+.mbubble{padding:11px 15px;border-radius:16px;font-size:.9rem;line-height:1.55;word-break:break-word}
+.msg.amy .mbubble{background:var(--blue);color:#fff;border-bottom-left-radius:4px}
+.msg.user .mbubble{background:#f1f5f9;color:var(--text);border-bottom-right-radius:4px}
+.mavatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:var(--blue-light)}
+.mmeta{font-size:.7rem;color:var(--muted);margin-top:3px;padding:0 3px}
+.msg.user .mmeta{text-align:right}
+
+/* typing */
+.typing .mbubble{display:flex;gap:5px;align-items:center;padding:14px 16px}
+.dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.7);animation:bounce 1.2s infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+
+/* ocr card inside bubble */
+.ocr-card{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:.8rem}
+.ocr-label{font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;opacity:.8;margin-bottom:5px}
+.ocr-text{font-family:monospace;font-size:.76rem;white-space:pre-wrap;opacity:.95;max-height:140px;overflow-y:auto}
+
+/* img preview in bubble */
+.img-preview-wrap{max-width:200px;border-radius:10px;overflow:hidden;margin-bottom:5px}
+.img-preview-wrap img{width:100%;display:block}
+
+/* input area */
+.input-area{border-top:1px solid var(--border);padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.staged{display:none;align-items:center;gap:8px;background:var(--blue-faint);border-radius:10px;padding:7px 12px;font-size:.8rem;color:var(--blue)}
+.staged.on{display:flex}
+.staged img{height:40px;border-radius:6px;object-fit:cover}
+.staged .rm{margin-left:auto;background:none;border:none;color:var(--blue);cursor:pointer;font-size:1rem}
+.irow{display:flex;gap:7px;align-items:flex-end}
+textarea{flex:1;resize:none;border:1.5px solid var(--border);border-radius:11px;padding:10px 13px;
+  font-family:inherit;font-size:.9rem;color:var(--text);background:var(--bg);outline:none;
+  transition:border-color .18s;max-height:110px;min-height:42px;line-height:1.45}
+textarea:focus{border-color:var(--blue)}
+textarea::placeholder{color:#a0aec0}
+.icon-btn{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  border:1.5px solid var(--border);background:var(--bg);cursor:pointer;font-size:16px;flex-shrink:0;transition:all .15s}
+.icon-btn:hover{background:var(--blue-light);border-color:var(--blue)}
+.send-btn{width:42px;height:42px;border-radius:11px;background:var(--blue);border:none;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s}
+.send-btn:hover{background:var(--blue-dark)}
+.send-btn:active{transform:scale(.93)}
+.send-btn:disabled{background:#94a3b8;cursor:not-allowed}
+.send-btn svg{color:#fff}
+#file-input{display:none}
+
+/* session notice */
+.notice{display:none;background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;
+  padding:9px 15px;font-size:.83rem;color:#92400e;align-items:center;gap:8px}
+.notice.on{display:flex}
+
+/* ── Data tables (shared) ────────────────────────────── */
+.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.card-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-hdr h2{font-size:1rem;font-weight:700;color:var(--text)}
+.card-hdr span{font-size:.78rem;color:var(--muted)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{background:#f8fafc;padding:10px 14px;text-align:left;font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+td{padding:10px 14px;font-size:.84rem;color:var(--text);border-top:1px solid var(--border)}
+tr:hover td{background:var(--blue-faint)}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:99px;font-size:.74rem;font-weight:700}
+.badge.green{background:#d1fae5;color:#065f46}
+.badge.blue{background:var(--blue-light);color:var(--blue-dark)}
+.badge.amber{background:#fef3c7;color:#92400e}
+.badge.red{background:#fee2e2;color:#991b1b}
+.badge.gray{background:#f1f5f9;color:var(--muted)}
+.empty-row td{text-align:center;color:var(--muted);padding:32px;font-size:.88rem}
+
+/* ── Reports detail ──────────────────────────────────── */
+.report-item{border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.report-item:last-child{margin-bottom:0}
+.ri-hdr{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.86rem;margin-bottom:6px}
+.ri-meta{font-size:.76rem;color:var(--muted);margin-bottom:6px}
+.ri-text{font-family:monospace;font-size:.76rem;color:var(--text);white-space:pre-wrap;
+  max-height:130px;overflow-y:auto;background:var(--bg);border-radius:8px;padding:8px}
+
+/* ── Refresh btn ─────────────────────────────────────── */
+.refresh-btn{padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);
+  background:var(--surface);color:var(--text);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s}
+.refresh-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-faint)}
+
+/* ── Stats row ───────────────────────────────────────── */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat-card{background:var(--surface);border-radius:14px;padding:16px 18px;box-shadow:0 2px 10px rgba(0,0,0,.06);
+  display:flex;flex-direction:column;gap:4px}
+.stat-card .sc-val{font-size:1.8rem;font-weight:800;color:var(--blue)}
+.stat-card .sc-lbl{font-size:.78rem;color:var(--muted);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- Header -->
+<div class="hdr">
+  <div class="hdr-icon">🩺</div>
+  <div>
+    <h1>Amy – Dr. Smith's AI Assistant</h1>
+    <p>Cardiology · Appointments · Medical Report Analysis · Test Dashboard</p>
+  </div>
+  <div class="hdr-status">Live</div>
+</div>
+
+<!-- Nav -->
+<div class="nav">
+  <button class="nav-btn active" onclick="switchTab('chat')" id="tab-chat">
+    <span class="nb-icon">💬</span><span>Chat</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('appointments')" id="tab-appointments">
+    <span class="nb-icon">📅</span><span>Appointments</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('reports')" id="tab-reports">
+    <span class="nb-icon">📋</span><span>Reports</span>
+  </button>
+  <button class="nav-btn" onclick="switchTab('sessions')" id="tab-sessions">
+    <span class="nb-icon">🗂️</span><span>Sessions</span>
+  </button>
+</div>
+
+<!-- ══════════ CHAT PANEL ══════════ -->
+<div class="panel active" id="panel-chat">
+  <!-- Session bar -->
+  <div class="sbar">
+    <strong>Session:</strong>
+    <span class="sid" id="sid-display">—</span>
+    <div class="sbar-actions">
+      <button class="pill-btn outline" onclick="copyThreadId()">📋 Copy ID</button>
+      <button class="pill-btn primary" onclick="newSession()">＋ New Session</button>
+    </div>
+  </div>
+
+  <!-- Chat card -->
+  <div class="chat-card">
+    <div class="msgs" id="msgs"></div>
+    <div class="input-area">
+      <div class="notice" id="notice">⚠️ Session ended. Click "New Session" to continue.</div>
+      <div class="staged" id="staged">
+        <img id="staged-img" src="" alt=""/>
+        <span id="staged-name"></span>
+        <button class="rm" onclick="clearStaged()">✕</button>
+      </div>
+      <div class="irow">
+        <button class="icon-btn" title="Attach medical report image or PDF" onclick="document.getElementById('file-input').click()">📎</button>
+        <input type="file" id="file-input" accept="image/*,application/pdf" onchange="stageImage(event)"/>
+        <textarea id="msg-in" placeholder="Type a message or attach a report image…" rows="1"
+          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick test prompts -->
+  <div class="card" style="padding:16px 18px">
+    <p style="font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">⚡ Quick Test Prompts</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px" id="quick-prompts"></div>
+  </div>
+</div>
+
+<!-- ══════════ APPOINTMENTS PANEL ══════════ -->
+<div class="panel" id="panel-appointments">
+  <div class="stats" id="appt-stats">
+    <div class="stat-card"><div class="sc-val" id="stat-appt-total">—</div><div class="sc-lbl">Total Appointments</div></div>
+    <div class="stat-card"><div class="sc-val" id="stat-appt-today">—</div><div class="sc-lbl">Today</div></div>
+    <div class="stat-card"><div class="sc-val" id="stat-appt-week">—</div><div class="sc-lbl">This Week</div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <h2>📅 All Appointments</h2>
+      <button class="refresh-btn" onclick="loadAppointments()">↻ Refresh</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Date</th><th>Time</th><th>Status</th><th>Session</th><th>Created</th></tr></thead>
+        <tbody id="appt-tbody"><tr class="empty-row"><td colspan="7">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ REPORTS PANEL ══════════ -->
+<div class="panel" id="panel-reports">
+  <div class="stats">
+    <div class="stat-card"><div class="sc-val" id="stat-rpt-total">—</div><div class="sc-lbl">Total Reports</div></div>
+    <div class="stat-card"><div class="sc-val" id="stat-rpt-session">—</div><div class="sc-lbl">This Session</div></div>
+    <div class="stat-card"><div class="sc-val" id="stat-rpt-today">—</div><div class="sc-lbl">Today</div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <h2>📋 Medical Reports (OCR)</h2>
+      <div style="display:flex;gap:8px;align-items:center">
+        <label style="font-size:.78rem;color:var(--muted)">
+          <input type="checkbox" id="rpt-session-only" onchange="loadReports()" style="margin-right:4px"/>
+          This session only
+        </label>
+        <button class="refresh-btn" onclick="loadReports()">↻ Refresh</button>
+      </div>
+    </div>
+    <div style="padding:16px" id="rpt-list"><p style="color:var(--muted);font-size:.88rem;text-align:center;padding:24px 0">Loading…</p></div>
+  </div>
+</div>
+
+<!-- ══════════ SESSIONS PANEL ══════════ -->
+<div class="panel" id="panel-sessions">
+  <div class="stats">
+    <div class="stat-card"><div class="sc-val" id="stat-sess-total">—</div><div class="sc-lbl">Total Sessions</div></div>
+    <div class="stat-card"><div class="sc-val" id="stat-sess-active">—</div><div class="sc-lbl">Active</div></div>
+    <div class="stat-card"><div class="sc-val" id="stat-sess-completed">—</div><div class="sc-lbl">Completed</div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <h2>🗂️ Chat Sessions</h2>
+      <button class="refresh-btn" onclick="loadSessions()">↻ Refresh</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Thread ID</th><th>Status</th><th>Messages</th><th>Created</th><th>Last Active</th><th>Action</th></tr></thead>
+        <tbody id="sess-tbody"><tr class="empty-row"><td colspan="6">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Session detail modal -->
+  <div class="card" id="sess-detail" style="display:none">
+    <div class="card-hdr">
+      <h2>📜 Session History: <span id="sess-detail-id" style="font-family:monospace;font-size:.88rem;color:var(--blue)"></span></h2>
+      <button class="pill-btn danger" onclick="document.getElementById('sess-detail').style.display='none'">✕ Close</button>
+    </div>
+    <div style="padding:16px;max-height:380px;overflow-y:auto" id="sess-msgs"></div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let threadId = genId();
+let sessionActive = true;
+let stagedFile = null;
+
+const QUICK = [
+  "Hello, what services does Dr. Smith offer?",
+  "What are the clinic hours?",
+  "I'd like to book an appointment",
+  "Is there availability tomorrow?",
+  "Check availability for next Monday",
+  "My name is John, email john@example.com, book me for tomorrow at 10 AM",
+];
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("sid-display").textContent = threadId;
+  appendMsg("amy", "👋 Hello! I'm Amy, Dr. Smith's AI assistant.\n\nI can help you:\n• Book & check appointments\n• Answer questions about the practice\n• Analyze uploaded medical report images\n\nHow can I help you today?");
+
+  // Quick prompts
+  const qp = document.getElementById("quick-prompts");
+  QUICK.forEach(q => {
+    const btn = document.createElement("button");
+    btn.style.cssText = "padding:6px 13px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);font-size:.78rem;cursor:pointer;color:var(--text);transition:all .15s";
+    btn.onmouseenter = () => { btn.style.borderColor = "var(--blue)"; btn.style.color = "var(--blue)"; btn.style.background = "var(--blue-faint)"; };
+    btn.onmouseleave = () => { btn.style.borderColor = "var(--border)"; btn.style.color = "var(--text)"; btn.style.background = "var(--surface)"; };
+    btn.onclick = () => { document.getElementById("msg-in").value = q; document.getElementById("msg-in").focus(); };
+    btn.textContent = q;
+    qp.appendChild(btn);
+  });
+});
+
+function genId() {
+  return "thread_" + Date.now() + "_" + Math.random().toString(36).slice(2,6);
+}
+
+// ═══════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("panel-" + name).classList.add("active");
+  document.getElementById("tab-" + name).classList.add("active");
+  if (name === "appointments") loadAppointments();
+  if (name === "reports") loadReports();
+  if (name === "sessions") loadSessions();
+}
+
+// ═══════════════════════════════════════════════════════
+// SESSION
+// ═══════════════════════════════════════════════════════
+function newSession() {
+  threadId = genId();
+  sessionActive = true;
+  document.getElementById("sid-display").textContent = threadId;
+  document.getElementById("msgs").innerHTML = "";
+  document.getElementById("notice").classList.remove("on");
+  clearStaged();
+  appendMsg("amy", "👋 New session started! How can I help you today?");
+}
+
+function copyThreadId() {
+  navigator.clipboard.writeText(threadId).then(() => alert("Thread ID copied!"));
+}
+
+// ═══════════════════════════════════════════════════════
+// IMAGE STAGING
+// ═══════════════════════════════════════════════════════
+function stageImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const isPdf = file.type === "application/pdf";
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const dataUrl = ev.target.result;
+    const b64 = dataUrl.split(",")[1];
+    const previewUrl = isPdf ? null : dataUrl;
+    stagedFile = { base64: b64, mimeType: file.type, name: file.name, dataUrl: previewUrl, isPdf };
+    const imgEl = document.getElementById("staged-img");
+    if (isPdf) { imgEl.style.display = "none"; }
+    else { imgEl.style.display = ""; imgEl.src = dataUrl; }
+    document.getElementById("staged-name").textContent = (isPdf ? "📄 " : "🖼️ ") + file.name;
+    document.getElementById("staged").classList.add("on");
+  };
+  reader.readAsDataURL(file);
+  e.target.value = "";
+}
+function clearStaged() {
+  stagedFile = null;
+  document.getElementById("staged-img").src = "";
+  document.getElementById("staged-name").textContent = "";
+  document.getElementById("staged").classList.remove("on");
+}
+
+// ═══════════════════════════════════════════════════════
+// SEND
+// ═══════════════════════════════════════════════════════
+async function sendMessage() {
+  if (!sessionActive) return;
+  const input = document.getElementById("msg-in");
+  const text = input.value.trim();
+  if (!text && !stagedFile) return;
+
+  const btn = document.getElementById("send-btn");
+  btn.disabled = true;
+
+  if (stagedFile) {
+    const f = stagedFile;
+    clearStaged();
+    appendImgMsg("user", f.dataUrl, f.name);
+    const tid = showTyping();
+    try {
+      const r = await fetch("/upload-image", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ base64Image: f.base64, mimeType: f.mimeType, filename: f.name, threadId }),
+      });
+      const d = await r.json();
+      removeTyping(tid);
+      if (d.success) {
+        appendOcrMsg("amy", d.extractedText, f.name, d.recordId);
+      } else {
+        appendMsg("amy", "❌ Failed to process image: " + (d.error || "Unknown error"));
+      }
+    } catch (err) {
+      removeTyping(tid);
+      appendMsg("amy", "❌ Error: " + err.message);
+    }
+  }
+
+  if (text) {
+    input.value = ""; autoResize(input);
+    appendMsg("user", text);
+    const tid = showTyping();
+    try {
+      const r = await fetch("/chat", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, threadId }),
+      });
+      const d = await r.json();
+      removeTyping(tid);
+      if (d.sessionStatus === "expired" || d.sessionStatus === "completed") {
+        sessionActive = false;
+        document.getElementById("notice").classList.add("on");
+      }
+      appendMsg("amy", d.response || d.error || "No response");
+    } catch (err) {
+      removeTyping(tid);
+      appendMsg("amy", "❌ Error: " + err.message);
+    }
+  }
+
+  btn.disabled = false;
+}
+
+function handleKey(e) { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+function autoResize(el) { el.style.height = "auto"; el.style.height = Math.min(el.scrollHeight, 110) + "px"; }
+
+// ═══════════════════════════════════════════════════════
+// MSG RENDERING
+// ═══════════════════════════════════════════════════════
+function appendMsg(role, text) {
+  const c = document.getElementById("msgs");
+  const isAmy = role === "amy";
+  const d = document.createElement("div");
+  d.className = "msg " + role;
+  d.innerHTML = `<div class="mavatar">${isAmy ? "🩺" : "👤"}</div><div>
+    <div class="mbubble">${esc(text).replace(/\n/g,"<br>")}</div>
+    <div class="mmeta">${ts()}</div></div>`;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+
+function appendImgMsg(role, dataUrl, name) {
+  const c = document.getElementById("msgs");
+  const d = document.createElement("div");
+  d.className = "msg " + role;
+  const isPdf = !dataUrl; // no dataUrl means it's a PDF
+  const previewHtml = isPdf
+    ? `<div style="font-size:2.5rem;text-align:center;padding:10px 20px">📄</div>`
+    : `<div class="img-preview-wrap"><img src="${dataUrl}" alt="${esc(name)}"/></div>`;
+  d.innerHTML = `<div class="mavatar">${role==="amy"?"🩺":"👤"}</div><div>
+    <div class="mbubble" style="padding:8px">
+      ${previewHtml}
+      <div style="font-size:.76rem;opacity:.7;margin-top:4px">${isPdf?"📄":"📎"} ${esc(name)}</div>
+    </div><div class="mmeta">${ts()}</div></div>`;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+
+function appendOcrMsg(role, text, filename, id) {
+  const c = document.getElementById("msgs");
+  const preview = text.length > 350 ? text.slice(0,350)+"…" : text;
+  const d = document.createElement("div");
+  d.className = "msg " + role;
+  d.innerHTML = `<div class="mavatar">🩺</div><div>
+    <div class="mbubble">✅ Medical report saved to MongoDB (ID: ${esc(String(id))})
+      <div class="ocr-card">
+        <div class="ocr-label">📄 ${esc(filename)}</div>
+        <div class="ocr-text">${esc(preview)}</div>
+      </div>
+      <div style="font-size:.75rem;opacity:.7;margin-top:5px">Full text stored · Ask me about it!</div>
+    </div><div class="mmeta">${ts()}</div></div>`;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+
+let tc = 0;
+function showTyping() {
+  const id = "t" + (++tc);
+  const c = document.getElementById("msgs");
+  const d = document.createElement("div");
+  d.className = "msg amy typing"; d.id = id;
+  d.innerHTML = `<div class="mavatar">🩺</div><div class="mbubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+  return id;
+}
+function removeTyping(id) { const e = document.getElementById(id); if(e) e.remove(); }
+
+// ═══════════════════════════════════════════════════════
+// APPOINTMENTS TAB
+// ═══════════════════════════════════════════════════════
+async function loadAppointments() {
+  const tbody = document.getElementById("appt-tbody");
+  tbody.innerHTML = `<tr class="empty-row"><td colspan="7">Loading…</td></tr>`;
+  try {
+    const r = await fetch("/admin/appointments");
+    const d = await r.json();
+    const appts = d.appointments || [];
+    document.getElementById("stat-appt-total").textContent = appts.length;
+    const today = new Date().toISOString().slice(0,10);
+    const weekAgo = new Date(Date.now() - 7*86400000).toISOString().slice(0,10);
+    document.getElementById("stat-appt-today").textContent = appts.filter(a=>a.date===today).length;
+    document.getElementById("stat-appt-week").textContent = appts.filter(a=>a.date>=weekAgo).length;
+
+    if (!appts.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="7">No appointments yet.</td></tr>`; return; }
+    tbody.innerHTML = appts.map(a => `<tr>
+      <td>${esc(a.name||"—")}</td>
+      <td>${esc(a.email||"—")}</td>
+      <td>${esc(a.date||"—")}</td>
+      <td>${esc(a.time||"—")}</td>
+      <td>${badge(a.status||"pending")}</td>
+      <td><span style="font-family:monospace;font-size:.74rem;color:var(--muted)">${esc((a.thread_id||"").slice(-12))}</span></td>
+      <td>${fmtDate(a.created_at)}</td>
+    </tr>`).join("");
+  } catch(e) { tbody.innerHTML = `<tr class="empty-row"><td colspan="7">Error: ${esc(e.message)}</td></tr>`; }
+}
+
+// ═══════════════════════════════════════════════════════
+// REPORTS TAB
+// ═══════════════════════════════════════════════════════
+async function loadReports() {
+  const list = document.getElementById("rpt-list");
+  list.innerHTML = `<p style="color:var(--muted);text-align:center;padding:24px 0">Loading…</p>`;
+  try {
+    const sessionOnly = document.getElementById("rpt-session-only").checked;
+    const url = sessionOnly ? `/reports?threadId=${encodeURIComponent(threadId)}` : "/admin/reports";
+    const r = await fetch(url);
+    const d = await r.json();
+    const rpts = d.reports || [];
+
+    document.getElementById("stat-rpt-total").textContent = rpts.length;
+    const today = new Date().toISOString().slice(0,10);
+    document.getElementById("stat-rpt-today").textContent = rpts.filter(r => r.created_at && new Date(r.created_at).toISOString().slice(0,10)===today).length;
+
+    const sessRpts = rpts.filter(r => r.thread_id === threadId);
+    document.getElementById("stat-rpt-session").textContent = sessRpts.length;
+
+    if (!rpts.length) { list.innerHTML = `<p style="color:var(--muted);text-align:center;padding:24px 0">No reports found.</p>`; return; }
+    list.innerHTML = rpts.map(r => {
+      // Use Cloudinary URL if available, fallback to base64, otherwise show placeholder
+      const imgSrc = r.image_url
+        ? r.image_url
+        : (r.image_base64 ? `data:${r.mime_type||'image/png'};base64,${r.image_base64}` : null);
+
+      const imgHtml = imgSrc
+        ? `<div style="margin-bottom:12px">
+             <div style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">📸 Original Report Image</div>
+             <img src="${imgSrc}"
+               alt="${esc(r.filename||'report')}"
+               style="max-width:100%;max-height:340px;border-radius:10px;border:1px solid var(--border);cursor:pointer;display:block;object-fit:contain"
+               onclick="this.style.maxHeight=this.style.maxHeight==='none'?'340px':'none'"
+               title="Click to expand / collapse"/>
+             <div style="font-size:.7rem;color:var(--muted);margin-top:4px">🔗 ${r.image_url ? '<a href="'+r.image_url+'" target="_blank" style="color:var(--blue)">Open full image ↗</a>' : 'Stored locally'} · Click image to expand</div>
+           </div>`
+        : `<div style="padding:10px 14px;background:var(--bg);border-radius:8px;border:1px dashed var(--border);color:var(--muted);font-size:.82rem;margin-bottom:8px">🖼️ No image stored for this report</div>`;
+      return `<div class="report-item">
+        <div class="ri-hdr">📄 ${esc(r.filename||"upload")} <span style="font-weight:400;color:var(--muted);font-size:.8rem"> · #${esc(String(r._id||""))}</span></div>
+        <div class="ri-meta">${fmtDate(r.created_at)} · ${esc(r.mime_type||"")} · Session: <span style="font-family:monospace">${esc((r.thread_id||"").slice(-12))}</span></div>
+        ${imgHtml}
+        <div style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px">📝 Extracted Text (OCR)</div>
+        <div class="ri-text">${esc(r.extracted_text||"")}</div>
+      </div>`;
+    }).join("");
+  } catch(e) { list.innerHTML = `<p style="color:var(--red);text-align:center;padding:24px 0">Error: ${esc(e.message)}</p>`; }
+}
+
+// ═══════════════════════════════════════════════════════
+// SESSIONS TAB
+// ═══════════════════════════════════════════════════════
+async function loadSessions() {
+  const tbody = document.getElementById("sess-tbody");
+  tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Loading…</td></tr>`;
+  try {
+    const r = await fetch("/admin/sessions");
+    const d = await r.json();
+    const sessions = d.sessions || [];
+
+    document.getElementById("stat-sess-total").textContent = sessions.length;
+    document.getElementById("stat-sess-active").textContent = sessions.filter(s=>s.status==="active").length;
+    document.getElementById("stat-sess-completed").textContent = sessions.filter(s=>s.status==="completed").length;
+
+    if (!sessions.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6">No sessions yet.</td></tr>`; return; }
+    tbody.innerHTML = sessions.map(s => `<tr>
+      <td><span style="font-family:monospace;font-size:.8rem;color:var(--blue)">${esc((s.thread_id||"").slice(-20))}</span></td>
+      <td>${badge(s.status||"active")}</td>
+      <td>${s.messages ? s.messages.length : "—"}</td>
+      <td>${fmtDate(s.created_at)}</td>
+      <td>${fmtDate(s.updated_at)}</td>
+      <td><button class="pill-btn outline" onclick="viewSession('${esc(s.thread_id||"")}')">View</button></td>
+    </tr>`).join("");
+  } catch(e) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Error: ${esc(e.message)}</td></tr>`; }
+}
+
+async function viewSession(tid) {
+  const det = document.getElementById("sess-detail");
+  const msgDiv = document.getElementById("sess-msgs");
+  document.getElementById("sess-detail-id").textContent = tid;
+  msgDiv.innerHTML = "<p style='color:var(--muted);font-size:.85rem'>Loading…</p>";
+  det.style.display = "block";
+  det.scrollIntoView({ behavior: "smooth" });
+  try {
+    const r = await fetch(`/admin/sessions/${encodeURIComponent(tid)}`);
+    const d = await r.json();
+    const msgs = (d.session && d.session.messages) ? d.session.messages : [];
+    if (!msgs.length) { msgDiv.innerHTML = "<p style='color:var(--muted);font-size:.85rem;text-align:center;padding:16px'>No messages.</p>"; return; }
+    msgDiv.innerHTML = msgs.map(m => {
+      const isUser = m.role === "user";
+      const isImage = m.type === "image";
+      const isOcr   = m.type === "ocr_result";
+
+      // Build bubble content
+      let bubbleContent = "";
+      if (isImage && (m.image_url || m.image_base64)) {
+        // Use Cloudinary URL if available, else fallback to base64
+        const src = m.image_url
+          ? m.image_url
+          : `data:${m.mime_type||'image/png'};base64,${m.image_base64}`;
+        bubbleContent = `
+          <div style="font-size:.75rem;opacity:.8;margin-bottom:5px">📎 ${esc(m.filename||"report")}</div>
+          <img src="${src}"
+            alt="${esc(m.filename||'report')}"
+            style="max-width:260px;max-height:200px;border-radius:8px;display:block;cursor:pointer"
+            onclick="this.style.maxWidth=this.style.maxWidth==='100%'?'260px':'100%'"
+            title="Click to expand"/>
+          ${m.image_url ? '<div style=\"font-size:.65rem;opacity:.6;margin-top:3px\"><a href=\"'+m.image_url+'\" target=\"_blank\" style=\"color:rgba(255,255,255,.8)\">Open full image ↗</a></div>' : ''}`;
+      } else {
+        bubbleContent = esc(m.content||"").replace(/\n/g,"<br>");
+      }
+
+      const bubbleStyle = isUser
+        ? "background:#f1f5f9;color:var(--text);border-bottom-right-radius:4px"
+        : isOcr
+          ? "background:#1e3a5f;color:#e0f2fe;border-bottom-left-radius:4px;font-size:.78rem"
+          : "background:var(--blue);color:#fff;border-bottom-left-radius:4px";
+
+      return `<div style="display:flex;gap:8px;margin-bottom:10px;${isUser?'flex-direction:row-reverse':''}">
+        <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">${isUser?"👤":"🩺"}</div>
+        <div>
+          <div style="padding:${isImage?'8px':'9px 13px'};border-radius:14px;font-size:.84rem;max-width:420px;word-break:break-word;${bubbleStyle}">${bubbleContent}</div>
+          <div style="font-size:.7rem;color:var(--muted);margin-top:2px;padding:0 3px;${isUser?'text-align:right':''}">${fmtDate(m.timestamp)}${m.agent?" · "+esc(m.agent):""}</div>
+        </div>
+      </div>`;
+    }).join("");
+  } catch(e) { msgDiv.innerHTML = `<p style="color:var(--red)">Error: ${esc(e.message)}</p>`; }
+}
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+function esc(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+}
+function ts() { return new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}); }
+function fmtDate(d) {
+  if (!d) return "—";
+  try { return new Date(d).toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}); }
+  catch { return String(d); }
+}
+function badge(status) {
+  const map = { confirmed:"green", active:"blue", completed:"green", expired:"amber", pending:"gray", failed:"red" };
+  const cls = map[status] || "gray";
+  return `<span class="badge ${cls}">${esc(status)}</span>`;
+}
+</script>
+</body>
+</html>

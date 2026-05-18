@@ -51,7 +51,7 @@ const SLOT_DURATION = 30; // 30 minutes slots
 
 // --- AUTHENTICATION ---
 const auth = new google.auth.GoogleAuth({
-  keyFile: "./service-account.json",
+  credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON),
   scopes: SCOPES,
 });
 const calendar = google.calendar({ version: "v3", auth });

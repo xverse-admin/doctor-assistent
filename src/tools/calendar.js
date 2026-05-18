@@ -44,6 +44,7 @@ require("dotenv").config();
 
 // --- CONFIGURATION ---
 const CALENDAR_ID = process.env.CALENDAR_ID;
+const doctors = require('../agents/doctors');
 const SCOPES = ["https://www.googleapis.com/auth/calendar"];
 const TIMEZONE = "Asia/Kolkata";
 const SLOT_DURATION = 30; // 30 minutes slots
@@ -86,16 +87,23 @@ const normalizeDate = (inputDate) => {
 
 // --- TOOL 1: CHECK AVAILABILITY (30 Minute Intervals) ---
 const checkAvailabilityTool = tool(
-  async ({ date }) => {
+  async ({ date, doctorId, calendarId }) => {
     try {
       const formattedDate = normalizeDate(date);
-      console.log(`[TOOL] Checking 30-min slots for ${formattedDate}...`);
+      let calId = calendarId;
+      if (!calId && doctorId) {
+        const doc = doctors.find(d => d.id === doctorId);
+        if (!doc) throw new Error(`Unknown doctorId: ${doctorId}`);
+        calId = doc.calendarId;
+      }
+      if (!calId) calId = CALENDAR_ID;
+      console.log(`[TOOL] Checking 30-min slots for ${formattedDate} on calendar ${calId}...`);
 
       const timeMin = new Date(`${formattedDate}T00:00:00`).toISOString();
       const timeMax = new Date(`${formattedDate}T23:59:59`).toISOString();
 
       const response = await calendar.events.list({
-        calendarId: CALENDAR_ID,
+        calendarId: calId,
         timeMin: timeMin,
         timeMax: timeMax,
         singleEvents: true,
@@ -149,84 +157,85 @@ const checkAvailabilityTool = tool(
   },
   {
     name: "check_availability",
-    description: "Checks availability in 30-minute intervals.",
-    schema: z.object({ date: z.string().describe("Date (e.g. 'tomorrow', '2025-01-10')") }),
+    description: "Checks availability in 30-minute intervals for a specific doctor.",
+    schema: z.object({ 
+      date: z.string().describe("Date (e.g. 'tomorrow', '2025-01-10')"),
+      doctorId: z.string().describe("Doctor ID (e.g. 'arjun-mehta')"),
+      calendarId: z.string().optional().describe("Google Calendar ID (optional, overrides doctorId)")
+    }),
   }
 );
 
 // --- TOOL 2: BOOK APPOINTMENT (Same as before) ---
 
 const bookAppointmentTool = tool(
-  async ({ date, time, email, name }) => {
+  async ({ date, time, email, name, doctorId, calendarId }) => {
     // 🔒 FIXED DURATION: 30 Minutes
     const DURATION_MINUTES = 30; 
 
     try {
       const formattedDate = normalizeDate(date);
-      
+      let calId = calendarId;
+      let doctorName = "";
+      if (!calId && doctorId) {
+        const doc = doctors.find(d => d.id === doctorId);
+        if (!doc) throw new Error(`Unknown doctorId: ${doctorId}`);
+        calId = doc.calendarId;
+        doctorName = doc.name;
+      }
+      if (!calId) calId = CALENDAR_ID;
+
       // --- FIX: Normalize Time (Handle "9:30 AM" -> "09:30") ---
       let cleanTime = time.trim().toUpperCase();
-      
-      // If it contains AM/PM, convert to 24-hour format
       if (cleanTime.includes("PM") || cleanTime.includes("AM")) {
          const [timePart, modifier] = cleanTime.split(" ");
          let [hours, minutes] = timePart.split(":");
-         
          if (hours === "12") {
             hours = "00";
          }
          if (modifier === "PM") {
             hours = parseInt(hours, 10) + 12;
          }
-         
          cleanTime = `${hours}:${minutes}`;
       }
-      
-      console.log(`[TOOL] Booking for ${email} on ${formattedDate} at ${cleanTime} (Orig: ${time})...`);
+      console.log(`[TOOL] Booking for ${email} on ${formattedDate} at ${cleanTime} (Orig: ${time}) on calendar ${calId}...`);
 
       // Now create the Date object using the clean 24h time
       const startDate = new Date(`${formattedDate}T${cleanTime}:00`);
-      
       if (isNaN(startDate.getTime())) {
          throw new Error(`Invalid time format. Received: ${time}`);
       }
-
       const endDate = new Date(startDate.getTime() + DURATION_MINUTES * 60 * 1000); 
 
       const event = {
         summary: `Appointment with ${name || email}`,
-        description: `Booked via Amy Assistant.`,
+        description: `Booked via Amy Assistant for ${doctorName || 'the doctor'}`,
         start: { dateTime: startDate.toISOString(), timeZone: TIMEZONE },
         end: { dateTime: endDate.toISOString(), timeZone: TIMEZONE },
         //attendees: [{ email: email }], 
       };
 
       await calendar.events.insert({
-        calendarId: CALENDAR_ID,
+        calendarId: calId,
         resource: event,
       });
 
       // 2. 📧 Send Confirmation Email Manually (Nodemailer)
       try {
         console.log(`[TOOL] Sending confirmation email to ${email}...`);
-        
         const mailOptions = {
-          from: '"Amy Assistant" <process.env.EMAIL_USER>',
+          from: `"Amy Assistant" <${process.env.EMAIL_USER}>`,
           to: email,
           subject: '✅ Appointment Confirmed',
-          text: `Hi ${name || 'there'},\n\nYour appointment has been successfully booked with Dr. Smith.\n\n📅 Date: ${formattedDate}\n🕒 Time: ${time}\n\nSee you then!\n\nBest,\nAmy Assistant`
+          text: `Hi ${name || 'there'},\n\nYour appointment has been successfully booked with ${doctorName || 'the doctor'}.\n\n📅 Date: ${formattedDate}\n🕒 Time: ${time}\n\nSee you then!\n\nBest,\nAmy Assistant`
         };
-
         await transporter.sendMail(mailOptions);
         console.log(`[TOOL] Email sent successfully.`);
-        
       } catch (emailError) {
         console.error("⚠️ Failed to send confirmation email:", emailError.message);
         // Don't throw error here, so the booking remains "Success"
       }
-
       return `SUCCESS: Appointment confirmed for ${formattedDate} at ${time}.`;
-
     } catch (error) {
       console.error("Booking Error:", error);
       return `Failed to book: ${error.message}`;
@@ -234,12 +243,14 @@ const bookAppointmentTool = tool(
   },
   {
     name: "book_appointment",
-    description: "Books an appointment.",
+    description: "Books an appointment for a specific doctor.",
     schema: z.object({
       date: z.string(),
-      time: z.string().describe("Time (e.g., '09:30' or '09:30 AM')"), // Updated description
+      time: z.string().describe("Time (e.g., '09:30' or '09:30 AM')"),
       email: z.string().email(),
       name: z.string().optional(),
+      doctorId: z.string().describe("Doctor ID (e.g. 'arjun-mehta')"),
+      calendarId: z.string().optional().describe("Google Calendar ID (optional, overrides doctorId)")
     }),
   }
 );

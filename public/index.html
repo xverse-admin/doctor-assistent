@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -15,11 +15,7 @@
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
   background:var(--bg);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px 12px 40px}
-
-/* ── Layout ─────────────────────────────────────────── */
 .wrap{width:100%;max-width:960px;display:flex;flex-direction:column;gap:14px}
-
-/* ── Header ──────────────────────────────────────────── */
 .hdr{background:linear-gradient(135deg,var(--blue) 0%,var(--purple) 100%);
   border-radius:var(--r);padding:22px 28px;display:flex;align-items:center;gap:14px;color:#fff;box-shadow:var(--shadow)}
 .hdr-icon{font-size:2.2rem;line-height:1}
@@ -28,20 +24,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 .hdr-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600}
 .hdr-status::before{content:'';width:9px;height:9px;border-radius:50%;background:#4ade80;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* ── Nav tabs ────────────────────────────────────────── */
 .nav{display:flex;gap:6px;background:var(--surface);border-radius:14px;padding:6px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .nav-btn{flex:1;padding:9px 6px;border:none;border-radius:10px;background:transparent;
   cursor:pointer;font-size:.83rem;font-weight:600;color:var(--muted);transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:3px}
 .nav-btn .nb-icon{font-size:1.2rem}
 .nav-btn.active{background:var(--blue);color:#fff;box-shadow:0 2px 10px rgba(37,99,235,.35)}
 .nav-btn:not(.active):hover{background:var(--blue-faint);color:var(--blue)}
-
-/* ── Panels ──────────────────────────────────────────── */
 .panel{display:none}
 .panel.active{display:flex;flex-direction:column;gap:14px}
-
-/* ── Session bar ─────────────────────────────────────── */
 .sbar{background:var(--surface);border-radius:12px;padding:11px 18px;
   display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--muted);box-shadow:0 2px 8px rgba(0,0,0,.05)}
 .sbar strong{color:var(--text)}
@@ -55,15 +45,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 .pill-btn.outline:hover{background:#bfdbfe}
 .pill-btn.danger{background:#fee2e2;color:var(--red)}
 .pill-btn.danger:hover{background:#fecaca}
-
-/* ── Chat card ───────────────────────────────────────── */
 .chat-card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);
   display:flex;flex-direction:column;overflow:hidden;height:480px}
 .msgs{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
 .msgs::-webkit-scrollbar{width:4px}
 .msgs::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
-
-/* bubbles */
 .msg{display:flex;gap:9px;max-width:84%}
 .msg.user{flex-direction:row-reverse;align-self:flex-end}
 .msg.amy{align-self:flex-start}
@@ -73,23 +59,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 .mavatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:var(--blue-light)}
 .mmeta{font-size:.7rem;color:var(--muted);margin-top:3px;padding:0 3px}
 .msg.user .mmeta{text-align:right}
-
-/* typing */
 .typing .mbubble{display:flex;gap:5px;align-items:center;padding:14px 16px}
 .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.7);animation:bounce 1.2s infinite}
 .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
 @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
-
-/* ocr card inside bubble */
 .ocr-card{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:9px 12px;margin-top:8px;font-size:.8rem}
 .ocr-label{font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;opacity:.8;margin-bottom:5px}
 .ocr-text{font-family:monospace;font-size:.76rem;white-space:pre-wrap;opacity:.95;max-height:140px;overflow-y:auto}
-
-/* img preview in bubble */
 .img-preview-wrap{max-width:200px;border-radius:10px;overflow:hidden;margin-bottom:5px}
 .img-preview-wrap img{width:100%;display:block}
-
-/* input area */
 .input-area{border-top:1px solid var(--border);padding:12px 14px;display:flex;flex-direction:column;gap:8px}
 .staged{display:none;align-items:center;gap:8px;background:var(--blue-faint);border-radius:10px;padding:7px 12px;font-size:.8rem;color:var(--blue)}
 .staged.on{display:flex}
@@ -111,13 +89,9 @@ textarea::placeholder{color:#a0aec0}
 .send-btn:disabled{background:#94a3b8;cursor:not-allowed}
 .send-btn svg{color:#fff}
 #file-input{display:none}
-
-/* session notice */
 .notice{display:none;background:#fef3c7;border:1px solid #fcd34d;border-radius:10px;
   padding:9px 15px;font-size:.83rem;color:#92400e;align-items:center;gap:8px}
 .notice.on{display:flex}
-
-/* ── Data tables (shared) ────────────────────────────── */
 .card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
 .card-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
 .card-hdr h2{font-size:1rem;font-weight:700;color:var(--text)}
@@ -134,21 +108,15 @@ tr:hover td{background:var(--blue-faint)}
 .badge.red{background:#fee2e2;color:#991b1b}
 .badge.gray{background:#f1f5f9;color:var(--muted)}
 .empty-row td{text-align:center;color:var(--muted);padding:32px;font-size:.88rem}
-
-/* ── Reports detail ──────────────────────────────────── */
 .report-item{border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px}
 .report-item:last-child{margin-bottom:0}
 .ri-hdr{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.86rem;margin-bottom:6px}
 .ri-meta{font-size:.76rem;color:var(--muted);margin-bottom:6px}
 .ri-text{font-family:monospace;font-size:.76rem;color:var(--text);white-space:pre-wrap;
   max-height:130px;overflow-y:auto;background:var(--bg);border-radius:8px;padding:8px}
-
-/* ── Refresh btn ─────────────────────────────────────── */
 .refresh-btn{padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);
   background:var(--surface);color:var(--text);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s}
 .refresh-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-faint)}
-
-/* ── Stats row ───────────────────────────────────────── */
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .stat-card{background:var(--surface);border-radius:14px;padding:16px 18px;box-shadow:0 2px 10px rgba(0,0,0,.06);
   display:flex;flex-direction:column;gap:4px}
@@ -164,7 +132,7 @@ tr:hover td{background:var(--blue-faint)}
   <div class="hdr-icon">🩺</div>
   <div>
     <h1>Amy – Dr. Smith's AI Assistant</h1>
-    <p>Cardiology · Appointments · Medical Report Analysis · Test Dashboard</p>
+    <p>Cardiology · Appointments · Medical Report Analysis</p>
   </div>
   <div class="hdr-status">Live</div>
 </div>
@@ -187,17 +155,23 @@ tr:hover td{background:var(--blue-faint)}
 
 <!-- ══════════ CHAT PANEL ══════════ -->
 <div class="panel active" id="panel-chat">
-  <!-- Session bar -->
+
+  <!-- CHANGE 2: Session bar now shows phone number + logout button -->
   <div class="sbar">
     <strong>Session:</strong>
     <span class="sid" id="sid-display">—</span>
+    <!-- CHANGE 2: Phone display span -->
+    <span id="user-phone-display"
+      style="font-size:.78rem;color:var(--blue);font-weight:600;margin-left:4px;background:var(--blue-faint);padding:2px 8px;border-radius:6px">
+    </span>
     <div class="sbar-actions">
       <button class="pill-btn outline" onclick="copyThreadId()">📋 Copy ID</button>
       <button class="pill-btn primary" onclick="newSession()">＋ New Session</button>
+      <!-- CHANGE 2: Logout button -->
+      <button class="pill-btn danger" onclick="logout()">Logout</button>
     </div>
   </div>
 
-  <!-- Chat card -->
   <div class="chat-card">
     <div class="msgs" id="msgs"></div>
     <div class="input-area">
@@ -222,7 +196,6 @@ tr:hover td{background:var(--blue-faint)}
     </div>
   </div>
 
-  <!-- Quick test prompts -->
   <div class="card" style="padding:16px 18px">
     <p style="font-size:.8rem;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">⚡ Quick Test Prompts</p>
     <div style="display:flex;flex-wrap:wrap;gap:8px" id="quick-prompts"></div>
@@ -232,13 +205,13 @@ tr:hover td{background:var(--blue-faint)}
 <!-- ══════════ APPOINTMENTS PANEL ══════════ -->
 <div class="panel" id="panel-appointments">
   <div class="stats" id="appt-stats">
-    <div class="stat-card"><div class="sc-val" id="stat-appt-total">—</div><div class="sc-lbl">Total Appointments</div></div>
+    <div class="stat-card"><div class="sc-val" id="stat-appt-total">—</div><div class="sc-lbl">My Appointments</div></div>
     <div class="stat-card"><div class="sc-val" id="stat-appt-today">—</div><div class="sc-lbl">Today</div></div>
     <div class="stat-card"><div class="sc-val" id="stat-appt-week">—</div><div class="sc-lbl">This Week</div></div>
   </div>
   <div class="card">
     <div class="card-hdr">
-      <h2>📅 All Appointments</h2>
+      <h2>📅 My Appointments</h2>
       <button class="refresh-btn" onclick="loadAppointments()">↻ Refresh</button>
     </div>
     <div class="tbl-wrap">
@@ -253,13 +226,14 @@ tr:hover td{background:var(--blue-faint)}
 <!-- ══════════ REPORTS PANEL ══════════ -->
 <div class="panel" id="panel-reports">
   <div class="stats">
-    <div class="stat-card"><div class="sc-val" id="stat-rpt-total">—</div><div class="sc-lbl">Total Reports</div></div>
+    <div class="sc-val" id="stat-rpt-total" style="display:none">—</div>
+    <div class="stat-card"><div class="sc-val" id="stat-rpt-total-display">—</div><div class="sc-lbl">My Reports</div></div>
     <div class="stat-card"><div class="sc-val" id="stat-rpt-session">—</div><div class="sc-lbl">This Session</div></div>
     <div class="stat-card"><div class="sc-val" id="stat-rpt-today">—</div><div class="sc-lbl">Today</div></div>
   </div>
   <div class="card">
     <div class="card-hdr">
-      <h2>📋 Medical Reports (OCR)</h2>
+      <h2>📋 My Medical Reports (OCR)</h2>
       <div style="display:flex;gap:8px;align-items:center">
         <label style="font-size:.78rem;color:var(--muted)">
           <input type="checkbox" id="rpt-session-only" onchange="loadReports()" style="margin-right:4px"/>
@@ -275,13 +249,13 @@ tr:hover td{background:var(--blue-faint)}
 <!-- ══════════ SESSIONS PANEL ══════════ -->
 <div class="panel" id="panel-sessions">
   <div class="stats">
-    <div class="stat-card"><div class="sc-val" id="stat-sess-total">—</div><div class="sc-lbl">Total Sessions</div></div>
+    <div class="stat-card"><div class="sc-val" id="stat-sess-total">—</div><div class="sc-lbl">My Sessions</div></div>
     <div class="stat-card"><div class="sc-val" id="stat-sess-active">—</div><div class="sc-lbl">Active</div></div>
     <div class="stat-card"><div class="sc-val" id="stat-sess-completed">—</div><div class="sc-lbl">Completed</div></div>
   </div>
   <div class="card">
     <div class="card-hdr">
-      <h2>🗂️ Chat Sessions</h2>
+      <h2>🗂️ My Chat Sessions</h2>
       <button class="refresh-btn" onclick="loadSessions()">↻ Refresh</button>
     </div>
     <div class="tbl-wrap">
@@ -292,7 +266,6 @@ tr:hover td{background:var(--blue-faint)}
     </div>
   </div>
 
-  <!-- Session detail modal -->
   <div class="card" id="sess-detail" style="display:none">
     <div class="card-hdr">
       <h2>📜 Session History: <span id="sess-detail-id" style="font-family:monospace;font-size:.88rem;color:var(--blue)"></span></h2>
@@ -305,12 +278,30 @@ tr:hover td{background:var(--blue-faint)}
 </div><!-- /wrap -->
 
 <script>
+// ── AUTH GUARD ────────────────────────────────────────────────────────────────
+(function authGuard() {
+  if (!sessionStorage.getItem("amy_verified")) {
+    window.location.replace("/login.html");
+  }
+})();
+
+// ── LOGOUT ────────────────────────────────────────────────────────────────────
+function logout() {
+  sessionStorage.removeItem("amy_verified");
+  sessionStorage.removeItem("amy_phone");
+  sessionStorage.removeItem("amy_uid");
+  window.location.replace("/login.html");
+}
+
 // ═══════════════════════════════════════════════════════
 // STATE
+// CHANGE 1: USER_PHONE added — links all data to logged-in user
 // ═══════════════════════════════════════════════════════
 let threadId = genId();
 let sessionActive = true;
 let stagedFile = null;
+
+const USER_PHONE = sessionStorage.getItem("amy_phone") || "";
 
 const QUICK = [
   "Hello, what services does Dr. Smith offer?",
@@ -328,13 +319,19 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("sid-display").textContent = threadId;
   appendMsg("amy", "👋 Hello! I'm Amy, Dr. Smith's AI assistant.\n\nI can help you:\n• Book & check appointments\n• Answer questions about the practice\n• Analyze uploaded medical report images\n\nHow can I help you today?");
 
+  // CHANGE 10: Show logged-in phone number in session bar
+  if (USER_PHONE) {
+    const phoneEl = document.getElementById("user-phone-display");
+    if (phoneEl) phoneEl.textContent = USER_PHONE;
+  }
+
   // Quick prompts
   const qp = document.getElementById("quick-prompts");
   QUICK.forEach(q => {
     const btn = document.createElement("button");
     btn.style.cssText = "padding:6px 13px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);font-size:.78rem;cursor:pointer;color:var(--text);transition:all .15s";
-    btn.onmouseenter = () => { btn.style.borderColor = "var(--blue)"; btn.style.color = "var(--blue)"; btn.style.background = "var(--blue-faint)"; };
-    btn.onmouseleave = () => { btn.style.borderColor = "var(--border)"; btn.style.color = "var(--text)"; btn.style.background = "var(--surface)"; };
+    btn.onmouseenter = () => { btn.style.borderColor="var(--blue)"; btn.style.color="var(--blue)"; btn.style.background="var(--blue-faint)"; };
+    btn.onmouseleave = () => { btn.style.borderColor="var(--border)"; btn.style.color="var(--text)"; btn.style.background="var(--surface)"; };
     btn.onclick = () => { document.getElementById("msg-in").value = q; document.getElementById("msg-in").focus(); };
     btn.textContent = q;
     qp.appendChild(btn);
@@ -397,6 +394,7 @@ function stageImage(e) {
   reader.readAsDataURL(file);
   e.target.value = "";
 }
+
 function clearStaged() {
   stagedFile = null;
   document.getElementById("staged-img").src = "";
@@ -424,7 +422,8 @@ async function sendMessage() {
     try {
       const r = await fetch("/upload-image", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ base64Image: f.base64, mimeType: f.mimeType, filename: f.name, threadId }),
+        // CHANGE 5: userPhone added so report is linked to this user in MongoDB
+        body: JSON.stringify({ base64Image: f.base64, mimeType: f.mimeType, filename: f.name, threadId, userPhone: USER_PHONE }),
       });
       const d = await r.json();
       removeTyping(tid);
@@ -446,7 +445,8 @@ async function sendMessage() {
     try {
       const r = await fetch("/chat", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, threadId }),
+        // CHANGE 4: userPhone added so session + appointments are linked to this user
+        body: JSON.stringify({ message: text, threadId, userPhone: USER_PHONE }),
       });
       const d = await r.json();
       removeTyping(tid);
@@ -485,7 +485,7 @@ function appendImgMsg(role, dataUrl, name) {
   const c = document.getElementById("msgs");
   const d = document.createElement("div");
   d.className = "msg " + role;
-  const isPdf = !dataUrl; // no dataUrl means it's a PDF
+  const isPdf = !dataUrl;
   const previewHtml = isPdf
     ? `<div style="font-size:2.5rem;text-align:center;padding:10px 20px">📄</div>`
     : `<div class="img-preview-wrap"><img src="${dataUrl}" alt="${esc(name)}"/></div>`;
@@ -499,17 +499,11 @@ function appendImgMsg(role, dataUrl, name) {
 
 function appendOcrMsg(role, text, filename, id) {
   const c = document.getElementById("msgs");
-  const preview = text.length > 350 ? text.slice(0,350)+"…" : text;
   const d = document.createElement("div");
   d.className = "msg " + role;
   d.innerHTML = `<div class="mavatar">🩺</div><div>
-    <div class="mbubble">✅ Medical report saved to MongoDB (ID: ${esc(String(id))})
-      <div class="ocr-card">
-        <div class="ocr-label">📄 ${esc(filename)}</div>
-        <div class="ocr-text">${esc(preview)}</div>
-      </div>
-      <div style="font-size:.75rem;opacity:.7;margin-top:5px">Full text stored · Ask me about it!</div>
-    </div><div class="mmeta">${ts()}</div></div>`;
+    <div class="mbubble">✅ Your medical report has been saved securely. The doctor will review your report soon. Thank you for uploading!</div>
+    <div class="mmeta">${ts()}</div></div>`;
   c.appendChild(d); c.scrollTop = c.scrollHeight;
 }
 
@@ -527,12 +521,14 @@ function removeTyping(id) { const e = document.getElementById(id); if(e) e.remov
 
 // ═══════════════════════════════════════════════════════
 // APPOINTMENTS TAB
+// CHANGE 7: Now fetches only THIS user's appointments via ?userPhone=
 // ═══════════════════════════════════════════════════════
 async function loadAppointments() {
   const tbody = document.getElementById("appt-tbody");
   tbody.innerHTML = `<tr class="empty-row"><td colspan="7">Loading…</td></tr>`;
   try {
-    const r = await fetch("/admin/appointments");
+    // Only loads appointments belonging to the logged-in user's phone number
+    const r = await fetch(`/appointments?userPhone=${encodeURIComponent(USER_PHONE)}`);
     const d = await r.json();
     const appts = d.appointments || [];
     document.getElementById("stat-appt-total").textContent = appts.length;
@@ -541,7 +537,10 @@ async function loadAppointments() {
     document.getElementById("stat-appt-today").textContent = appts.filter(a=>a.date===today).length;
     document.getElementById("stat-appt-week").textContent = appts.filter(a=>a.date>=weekAgo).length;
 
-    if (!appts.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="7">No appointments yet.</td></tr>`; return; }
+    if (!appts.length) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="7">No appointments found for your account.</td></tr>`;
+      return;
+    }
     tbody.innerHTML = appts.map(a => `<tr>
       <td>${esc(a.name||"—")}</td>
       <td>${esc(a.email||"—")}</td>
@@ -556,40 +555,46 @@ async function loadAppointments() {
 
 // ═══════════════════════════════════════════════════════
 // REPORTS TAB
+// CHANGE 6: Now fetches only THIS user's reports via ?userPhone=
 // ═══════════════════════════════════════════════════════
 async function loadReports() {
   const list = document.getElementById("rpt-list");
   list.innerHTML = `<p style="color:var(--muted);text-align:center;padding:24px 0">Loading…</p>`;
   try {
     const sessionOnly = document.getElementById("rpt-session-only").checked;
-    const url = sessionOnly ? `/reports?threadId=${encodeURIComponent(threadId)}` : "/admin/reports";
+    // Always filter by userPhone — optionally also by threadId for this session only
+    const url = sessionOnly
+      ? `/reports?userPhone=${encodeURIComponent(USER_PHONE)}&threadId=${encodeURIComponent(threadId)}`
+      : `/reports?userPhone=${encodeURIComponent(USER_PHONE)}`;
     const r = await fetch(url);
     const d = await r.json();
     const rpts = d.reports || [];
 
-    document.getElementById("stat-rpt-total").textContent = rpts.length;
+    const displayEl = document.getElementById("stat-rpt-total-display");
+    if (displayEl) displayEl.textContent = rpts.length;
     const today = new Date().toISOString().slice(0,10);
     document.getElementById("stat-rpt-today").textContent = rpts.filter(r => r.created_at && new Date(r.created_at).toISOString().slice(0,10)===today).length;
-
     const sessRpts = rpts.filter(r => r.thread_id === threadId);
     document.getElementById("stat-rpt-session").textContent = sessRpts.length;
 
-    if (!rpts.length) { list.innerHTML = `<p style="color:var(--muted);text-align:center;padding:24px 0">No reports found.</p>`; return; }
+    if (!rpts.length) {
+      list.innerHTML = `<p style="color:var(--muted);text-align:center;padding:24px 0">No reports found for your account.</p>`;
+      return;
+    }
     list.innerHTML = rpts.map(r => {
-      // Use Cloudinary URL if available, fallback to base64, otherwise show placeholder
       const imgSrc = r.image_url
         ? r.image_url
         : (r.image_base64 ? `data:${r.mime_type||'image/png'};base64,${r.image_base64}` : null);
-
       const imgHtml = imgSrc
         ? `<div style="margin-bottom:12px">
              <div style="font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">📸 Original Report Image</div>
-             <img src="${imgSrc}"
-               alt="${esc(r.filename||'report')}"
+             <img src="${imgSrc}" alt="${esc(r.filename||'report')}"
                style="max-width:100%;max-height:340px;border-radius:10px;border:1px solid var(--border);cursor:pointer;display:block;object-fit:contain"
                onclick="this.style.maxHeight=this.style.maxHeight==='none'?'340px':'none'"
                title="Click to expand / collapse"/>
-             <div style="font-size:.7rem;color:var(--muted);margin-top:4px">🔗 ${r.image_url ? '<a href="'+r.image_url+'" target="_blank" style="color:var(--blue)">Open full image ↗</a>' : 'Stored locally'} · Click image to expand</div>
+             <div style="font-size:.7rem;color:var(--muted);margin-top:4px">
+               🔗 ${r.image_url ? '<a href="'+r.image_url+'" target="_blank" style="color:var(--blue)">Open full image ↗</a>' : 'Stored locally'} · Click image to expand
+             </div>
            </div>`
         : `<div style="padding:10px 14px;background:var(--bg);border-radius:8px;border:1px dashed var(--border);color:var(--muted);font-size:.82rem;margin-bottom:8px">🖼️ No image stored for this report</div>`;
       return `<div class="report-item">
@@ -605,12 +610,14 @@ async function loadReports() {
 
 // ═══════════════════════════════════════════════════════
 // SESSIONS TAB
+// CHANGE 8: Now fetches only THIS user's sessions via ?userPhone=
 // ═══════════════════════════════════════════════════════
 async function loadSessions() {
   const tbody = document.getElementById("sess-tbody");
   tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Loading…</td></tr>`;
   try {
-    const r = await fetch("/admin/sessions");
+    // Only loads sessions belonging to the logged-in user's phone number
+    const r = await fetch(`/sessions?userPhone=${encodeURIComponent(USER_PHONE)}`);
     const d = await r.json();
     const sessions = d.sessions || [];
 
@@ -618,7 +625,10 @@ async function loadSessions() {
     document.getElementById("stat-sess-active").textContent = sessions.filter(s=>s.status==="active").length;
     document.getElementById("stat-sess-completed").textContent = sessions.filter(s=>s.status==="completed").length;
 
-    if (!sessions.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6">No sessions yet.</td></tr>`; return; }
+    if (!sessions.length) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="6">No sessions found for your account.</td></tr>`;
+      return;
+    }
     tbody.innerHTML = sessions.map(s => `<tr>
       <td><span style="font-family:monospace;font-size:.8rem;color:var(--blue)">${esc((s.thread_id||"").slice(-20))}</span></td>
       <td>${badge(s.status||"active")}</td>
@@ -630,6 +640,7 @@ async function loadSessions() {
   } catch(e) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6">Error: ${esc(e.message)}</td></tr>`; }
 }
 
+// CHANGE 9: viewSession now sends userPhone for server-side ownership check
 async function viewSession(tid) {
   const det = document.getElementById("sess-detail");
   const msgDiv = document.getElementById("sess-msgs");
@@ -638,40 +649,37 @@ async function viewSession(tid) {
   det.style.display = "block";
   det.scrollIntoView({ behavior: "smooth" });
   try {
-    const r = await fetch(`/admin/sessions/${encodeURIComponent(tid)}`);
+    const r = await fetch(`/sessions/${encodeURIComponent(tid)}?userPhone=${encodeURIComponent(USER_PHONE)}`);
     const d = await r.json();
     const msgs = (d.session && d.session.messages) ? d.session.messages : [];
-    if (!msgs.length) { msgDiv.innerHTML = "<p style='color:var(--muted);font-size:.85rem;text-align:center;padding:16px'>No messages.</p>"; return; }
+    if (!msgs.length) {
+      msgDiv.innerHTML = "<p style='color:var(--muted);font-size:.85rem;text-align:center;padding:16px'>No messages.</p>";
+      return;
+    }
     msgDiv.innerHTML = msgs.map(m => {
       const isUser = m.role === "user";
       const isImage = m.type === "image";
       const isOcr   = m.type === "ocr_result";
-
-      // Build bubble content
       let bubbleContent = "";
       if (isImage && (m.image_url || m.image_base64)) {
-        // Use Cloudinary URL if available, else fallback to base64
         const src = m.image_url
           ? m.image_url
           : `data:${m.mime_type||'image/png'};base64,${m.image_base64}`;
         bubbleContent = `
           <div style="font-size:.75rem;opacity:.8;margin-bottom:5px">📎 ${esc(m.filename||"report")}</div>
-          <img src="${src}"
-            alt="${esc(m.filename||'report')}"
+          <img src="${src}" alt="${esc(m.filename||'report')}"
             style="max-width:260px;max-height:200px;border-radius:8px;display:block;cursor:pointer"
             onclick="this.style.maxWidth=this.style.maxWidth==='100%'?'260px':'100%'"
             title="Click to expand"/>
-          ${m.image_url ? '<div style=\"font-size:.65rem;opacity:.6;margin-top:3px\"><a href=\"'+m.image_url+'\" target=\"_blank\" style=\"color:rgba(255,255,255,.8)\">Open full image ↗</a></div>' : ''}`;
+          ${m.image_url ? '<div style="font-size:.65rem;opacity:.6;margin-top:3px"><a href="'+m.image_url+'" target="_blank" style="color:rgba(255,255,255,.8)">Open full image ↗</a></div>' : ''}`;
       } else {
         bubbleContent = esc(m.content||"").replace(/\n/g,"<br>");
       }
-
       const bubbleStyle = isUser
         ? "background:#f1f5f9;color:var(--text);border-bottom-right-radius:4px"
         : isOcr
           ? "background:#1e3a5f;color:#e0f2fe;border-bottom-left-radius:4px;font-size:.78rem"
           : "background:var(--blue);color:#fff;border-bottom-left-radius:4px";
-
       return `<div style="display:flex;gap:8px;margin-bottom:10px;${isUser?'flex-direction:row-reverse':''}">
         <div style="width:28px;height:28px;border-radius:50%;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">${isUser?"👤":"🩺"}</div>
         <div>

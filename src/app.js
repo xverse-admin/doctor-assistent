@@ -3,6 +3,7 @@ const express      = require("express");
 const path         = require("path");
 const cors         = require("cors");
 const chatRoutes   = require("./routes/chatRoutes");
+const authRoutes   = require("./routes/authRoutes");
 const twilioRoutes = require("./routes/twilio.route");
 const imageRoutes  = require("./routes/imageRoutes");
 const adminRoutes  = require("./routes/adminRoutes");
@@ -17,6 +18,7 @@ app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 app.use(express.static(path.join(__dirname, "../public")));
 
 // API routes
+app.use("/", authRoutes);
 app.use("/", chatRoutes);
 app.use("/", imageRoutes);
 app.use("/", adminRoutes);

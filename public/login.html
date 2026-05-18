@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Amy – Login / Register</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:#f0f4ff;min-height:100vh;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.card{
+  background:#fff;border-radius:24px;
+  box-shadow:0 8px 40px rgba(37,99,235,.13);
+  width:100%;max-width:440px;overflow:hidden;
+}
+.card-top{
+  background:linear-gradient(135deg,#2563eb 0%,#7c3aed 100%);
+  padding:32px 32px 24px;text-align:center;color:#fff;
+}
+.logo{font-size:3rem;margin-bottom:8px}
+.card-top h1{font-size:1.4rem;font-weight:700}
+.card-top p{font-size:.85rem;opacity:.85;margin-top:3px}
+.tabs{display:flex;background:rgba(255,255,255,.15);border-radius:10px;
+  margin-top:16px;padding:3px;gap:3px}
+.tab-btn{flex:1;padding:8px;border:none;border-radius:8px;
+  background:transparent;color:rgba(255,255,255,.75);cursor:pointer;
+  font-size:.88rem;font-weight:600;transition:all .15s;font-family:inherit}
+.tab-btn.active{background:#fff;color:#2563eb}
+.card-body{padding:28px 32px}
+.step{display:none}.step.active{display:block}
+.field{margin-bottom:16px}
+.lbl{display:block;font-size:.82rem;font-weight:600;color:#374151;margin-bottom:6px}
+.inp{width:100%;padding:12px 14px;border:2px solid #e2e8f0;border-radius:11px;
+  font-size:.95rem;font-family:inherit;color:#1e293b;outline:none;
+  transition:border-color .2s;background:#fff}
+.inp:focus{border-color:#2563eb}
+.inp::placeholder{color:#a0aec0}
+.inp-wrap{display:flex;border:2px solid #e2e8f0;border-radius:11px;
+  overflow:hidden;transition:border-color .2s}
+.inp-wrap:focus-within{border-color:#2563eb}
+.inp-prefix{padding:0 12px;background:#f8fafc;border-right:2px solid #e2e8f0;
+  display:flex;align-items:center;font-size:.9rem;font-weight:600;
+  color:#374151;white-space:nowrap}
+.inp-wrap input{flex:1;padding:12px 14px;border:none;outline:none;
+  font-size:.95rem;font-family:inherit;background:transparent;color:#1e293b}
+.inp-wrap input::placeholder{color:#a0aec0}
+.otp-wrap{display:flex;gap:10px;justify-content:center;margin:8px 0}
+.otp-box{width:52px;height:60px;border:2px solid #e2e8f0;border-radius:12px;
+  text-align:center;font-size:1.5rem;font-weight:700;color:#1e293b;
+  outline:none;transition:border-color .2s;background:#fff;font-family:inherit}
+.otp-box:focus{border-color:#2563eb;background:#eff6ff}
+.btn{width:100%;padding:13px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;
+  font-size:1rem;font-weight:700;cursor:pointer;
+  transition:opacity .2s,transform .1s;margin-top:6px}
+.btn:hover{opacity:.9}.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.alert{border-radius:10px;padding:10px 14px;font-size:.84rem;
+  margin-bottom:14px;display:none}
+.alert.error{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}
+.alert.success{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
+.alert.show{display:block}
+.hint{font-size:.8rem;color:#64748b;text-align:center;margin-top:12px}
+.hint a{color:#2563eb;cursor:pointer;text-decoration:underline}
+.phone-show{font-weight:700;color:#2563eb}
+.resend{text-align:center;font-size:.8rem;color:#64748b;margin-top:12px}
+.resend-btn{color:#2563eb;cursor:pointer;text-decoration:underline;
+  background:none;border:none;font-size:.8rem;font-family:inherit}
+.resend-btn:disabled{color:#94a3b8;cursor:not-allowed;text-decoration:none}
+.pass-wrap{position:relative}
+.pass-wrap .inp{padding-right:44px}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;font-size:1.1rem;
+  color:#94a3b8;padding:0}
+.spinner{display:inline-block;width:15px;height:15px;
+  border:2px solid rgba(255,255,255,.4);border-top-color:#fff;
+  border-radius:50%;animation:spin .6s linear infinite;
+  vertical-align:middle;margin-right:5px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="card-top">
+    <div class="logo">🩺</div>
+    <h1>Amy – Dr. Smith's Assistant</h1>
+    <p>Apollo Specialty Hospital, Hyderabad</p>
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-login"    onclick="switchMode('login')">Login</button>
+      <button class="tab-btn"        id="tab-register" onclick="switchMode('register')">Register</button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="alert error"   id="global-error"></div>
+    <div class="alert success" id="global-success"></div>
+
+    <!-- ══ LOGIN — Phone + Password ══ -->
+    <div class="step active" id="step-login">
+      <div class="field">
+        <label class="lbl">Mobile Number</label>
+        <div class="inp-wrap">
+          <div class="inp-prefix">🇮🇳 +91</div>
+          <input type="tel" id="login-phone" placeholder="98765 43210"
+            maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')"
+            onkeydown="if(event.key==='Enter') doLogin()"/>
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">Password</label>
+        <div class="pass-wrap">
+          <input class="inp" type="password" id="login-password"
+            placeholder="Enter your password"
+            onkeydown="if(event.key==='Enter') doLogin()"/>
+          <button class="eye-btn" onclick="togglePass('login-password',this)">👁</button>
+        </div>
+      </div>
+      <button class="btn" id="login-btn" onclick="doLogin()">Login</button>
+      <p class="hint">Don't have an account?
+        <a onclick="switchMode('register')">Register here</a>
+      </p>
+    </div>
+
+    <!-- ══ REGISTER STEP 1 — Details ══ -->
+    <div class="step" id="step-register">
+      <div class="field">
+        <label class="lbl">Full Name</label>
+        <input class="inp" type="text" id="reg-name" placeholder="Ravi Kumar"/>
+      </div>
+      <div class="field">
+        <label class="lbl">Email Address</label>
+        <input class="inp" type="email" id="reg-email" placeholder="ravi@gmail.com"/>
+      </div>
+      <div class="field">
+        <label class="lbl">Mobile Number</label>
+        <div class="inp-wrap">
+          <div class="inp-prefix">🇮🇳 +91</div>
+          <input type="tel" id="reg-phone" placeholder="98765 43210"
+            maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')"/>
+        </div>
+      </div>
+      <div class="field">
+        <label class="lbl">Password</label>
+        <div class="pass-wrap">
+          <input class="inp" type="password" id="reg-password"
+            placeholder="Min. 6 characters"/>
+          <button class="eye-btn" onclick="togglePass('reg-password',this)">👁</button>
+        </div>
+      </div>
+      <button class="btn" id="register-btn" onclick="doRegister()">
+        Send OTP &amp; Register
+      </button>
+      <p class="hint">Already have an account?
+        <a onclick="switchMode('login')">Login here</a>
+      </p>
+    </div>
+
+    <!-- ══ REGISTER STEP 2 — OTP ══ -->
+    <div class="step" id="step-otp">
+      <p style="text-align:center;color:#374151;font-size:.92rem;margin-bottom:6px">
+        OTP sent to <span class="phone-show" id="otp-phone-display"></span>
+      </p>
+      <p style="text-align:center;color:#64748b;font-size:.82rem;margin-bottom:20px">
+        Enter the 6-digit code sent to your mobile via SMS
+      </p>
+      <div class="otp-wrap">
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric"
+          id="o1" onkeyup="otpNav(this,null,'o2')"/>
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric"
+          id="o2" onkeyup="otpNav(this,'o1','o3')"/>
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric"
+          id="o3" onkeyup="otpNav(this,'o2','o4')"/>
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric"
+          id="o4" onkeyup="otpNav(this,'o3','o5')"/>
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric"
+          id="o5" onkeyup="otpNav(this,'o4','o6')"/>
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric"
+          id="o6" onkeyup="otpNav(this,'o5',null)"/>
+      </div>
+      <button class="btn" id="verify-btn" onclick="doVerifyOtp()">
+        Verify &amp; Complete Registration
+      </button>
+      <div class="resend">
+        <button class="resend-btn" id="resend-btn"
+          onclick="doResendOtp()" disabled>Resend OTP</button>
+        <span id="timer-text"> in <span id="timer">30s</span></span>
+      </div>
+      <p class="hint"><a onclick="showStep('step-register')">← Change details</a></p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+let currentPhone = "";
+let timerInterval;
+
+// ── Mode switch ────────────────────────────────────────────────────────────────
+function switchMode(mode) {
+  document.getElementById("tab-login").classList.toggle("active",    mode === "login");
+  document.getElementById("tab-register").classList.toggle("active", mode === "register");
+  showStep(mode === "login" ? "step-login" : "step-register");
+  clearAlerts();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// LOGIN — Phone + Password only (no OTP)
+// ══════════════════════════════════════════════════════════════════
+async function doLogin() {
+  const phone    = document.getElementById("login-phone").value.trim();
+  const password = document.getElementById("login-password").value;
+  if (phone.length !== 10) return showError("Enter a valid 10-digit mobile number.");
+  if (!password)           return showError("Please enter your password.");
+
+  setLoading("login-btn", true, "Logging in...");
+  clearAlerts();
+  try {
+    const res  = await fetch("/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: "+91" + phone, password }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      sessionStorage.setItem("amy_verified", "true");
+      sessionStorage.setItem("amy_phone",    data.user.phone);
+      sessionStorage.setItem("amy_name",     data.user.name);
+      sessionStorage.setItem("amy_email",    data.user.email);
+      sessionStorage.setItem("amy_token",    data.token);
+      window.location.href = "/index.html";
+    } else {
+      showError(data.error || "Login failed. Please try again.");
+    }
+  } catch (err) {
+    showError("Network error. Please try again.");
+  } finally {
+    setLoading("login-btn", false, "Login");
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// REGISTER STEP 1 — Send OTP via Twilio
+// ══════════════════════════════════════════════════════════════════
+async function doRegister() {
+  const name     = document.getElementById("reg-name").value.trim();
+  const email    = document.getElementById("reg-email").value.trim();
+  const phone    = document.getElementById("reg-phone").value.trim();
+  const password = document.getElementById("reg-password").value;
+
+  if (!name || !email || !phone || !password)
+    return showError("All fields are required.");
+  if (phone.length !== 10)
+    return showError("Enter a valid 10-digit mobile number.");
+  if (password.length < 6)
+    return showError("Password must be at least 6 characters.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+    return showError("Invalid email address.");
+
+  currentPhone = "+91" + phone;
+  setLoading("register-btn", true, "Sending OTP...");
+  clearAlerts();
+
+  try {
+    const res  = await fetch("/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, phone, password }),
+    });
+    const data = await res.json();
+
+    if (data.success && data.step === "otp") {
+      document.getElementById("otp-phone-display").textContent = data.phone;
+      showStep("step-otp");
+      document.getElementById("o1").focus();
+      startTimer(30);
+    } else {
+      showError(data.error || "Registration failed.");
+    }
+  } catch (err) {
+    showError("Network error. Please try again.");
+  } finally {
+    setLoading("register-btn", false, "Send OTP & Register");
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// REGISTER STEP 2 — Verify OTP via Twilio
+// ══════════════════════════════════════════════════════════════════
+async function doVerifyOtp() {
+  const otp = ["o1","o2","o3","o4","o5","o6"]
+    .map(id => document.getElementById(id).value).join("");
+  if (otp.length !== 6 || !/^\d{6}$/.test(otp))
+    return showError("Please enter all 6 digits.");
+
+  setLoading("verify-btn", true, "Verifying...");
+  clearAlerts();
+  try {
+    const res  = await fetch("/auth/verify-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: currentPhone, otp }),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      sessionStorage.setItem("amy_verified", "true");
+      sessionStorage.setItem("amy_phone",    data.user.phone);
+      sessionStorage.setItem("amy_name",     data.user.name);
+      sessionStorage.setItem("amy_email",    data.user.email);
+      sessionStorage.setItem("amy_token",    data.token);
+      showSuccess("✅ Registration complete! Redirecting...");
+      setTimeout(() => window.location.href = "/index.html", 1200);
+    } else {
+      showError(data.error || "Invalid OTP. Please try again.");
+      clearOtpBoxes();
+    }
+  } catch (err) {
+    showError("Network error. Please try again.");
+  } finally {
+    setLoading("verify-btn", false, "Verify & Complete Registration");
+  }
+}
+
+// ── Resend OTP ─────────────────────────────────────────────────────────────────
+async function doResendOtp() {
+  document.getElementById("resend-btn").disabled = true;
+  clearOtpBoxes();
+  clearAlerts();
+  try {
+    const res  = await fetch("/auth/resend-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: currentPhone }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      startTimer(30);
+      showSuccess("OTP resent successfully!");
+      document.getElementById("o1").focus();
+    } else {
+      showError(data.error || "Failed to resend OTP.");
+    }
+  } catch (err) {
+    showError("Network error. Please try again.");
+  }
+}
+
+// ── OTP BOX NAVIGATION ─────────────────────────────────────────────────────────
+function otpNav(el, prevId, nextId) {
+  const val = el.value.replace(/\D/g, "");
+  el.value = val.slice(-1);
+  if (val && nextId)  document.getElementById(nextId).focus();
+  if (!val && prevId) document.getElementById(prevId).focus();
+  const full = ["o1","o2","o3","o4","o5","o6"].every(
+    id => document.getElementById(id).value
+  );
+  if (full) doVerifyOtp();
+}
+function clearOtpBoxes() {
+  ["o1","o2","o3","o4","o5","o6"].forEach(id =>
+    document.getElementById(id).value = "");
+  try { document.getElementById("o1").focus(); } catch(e) {}
+}
+
+// ── TIMER ──────────────────────────────────────────────────────────────────────
+function startTimer(secs) {
+  clearInterval(timerInterval);
+  const timerEl   = document.getElementById("timer");
+  const timerText = document.getElementById("timer-text");
+  const resendBtn = document.getElementById("resend-btn");
+  resendBtn.disabled = true;
+  timerText.style.display = "";
+  let t = secs;
+  timerEl.textContent = t + "s";
+  timerInterval = setInterval(() => {
+    t--;
+    timerEl.textContent = t + "s";
+    if (t <= 0) {
+      clearInterval(timerInterval);
+      timerText.style.display = "none";
+      resendBtn.disabled = false;
+    }
+  }, 1000);
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────────────────
+function showStep(id) {
+  document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  clearAlerts();
+}
+function showError(msg) {
+  const el = document.getElementById("global-error");
+  el.textContent = msg; el.classList.add("show");
+  document.getElementById("global-success").classList.remove("show");
+}
+function showSuccess(msg) {
+  const el = document.getElementById("global-success");
+  el.textContent = msg; el.classList.add("show");
+  document.getElementById("global-error").classList.remove("show");
+}
+function clearAlerts() {
+  document.getElementById("global-error").classList.remove("show");
+  document.getElementById("global-success").classList.remove("show");
+}
+function setLoading(id, loading, text) {
+  const btn = document.getElementById(id);
+  btn.disabled = loading;
+  btn.innerHTML = loading ? `<span class="spinner"></span>${text}` : text;
+}
+function togglePass(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  inp.type  = inp.type === "password" ? "text" : "password";
+  btn.textContent = inp.type === "password" ? "👁" : "🙈";
+}
+</script>
+</body>
+</html>

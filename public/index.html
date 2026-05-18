@@ -32,12 +32,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
 .nav-btn:not(.active):hover{background:var(--blue-faint);color:var(--blue)}
 .panel{display:none}
 .panel.active{display:flex;flex-direction:column;gap:14px}
-.sbar{background:var(--surface);border-radius:12px;padding:11px 18px;
-  display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--muted);box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.sbar{background:var(--surface);border-radius:12px;padding:10px 14px;
+  display:flex;flex-direction:column;gap:8px;
+  font-size:.82rem;color:var(--muted);box-shadow:0 2px 8px rgba(0,0,0,.05)}
 .sbar strong{color:var(--text)}
-.sid{font-family:monospace;font-size:.78rem;color:var(--blue);background:var(--blue-faint);
-  padding:2px 8px;border-radius:6px}
-.sbar-actions{margin-left:auto;display:flex;gap:6px}
+.sid{font-family:monospace;font-size:.75rem;color:var(--blue);background:var(--blue-faint);
+  padding:2px 8px;border-radius:6px;max-width:140px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sbar-actions{display:flex;gap:6px;flex-wrap:wrap}
 .pill-btn{padding:5px 13px;border-radius:8px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;transition:all .15s}
 .pill-btn.primary{background:var(--blue);color:#fff}
 .pill-btn.primary:hover{background:var(--blue-dark)}
@@ -158,19 +160,20 @@ tr:hover td{background:var(--blue-faint)}
 
   <!-- CHANGE 2: Session bar now shows phone number + logout button -->
   <div class="sbar">
-    <!-- <strong>Session:</strong>
-    <span class="sid" id="sid-display">—</span> -->
-    <!-- CHANGE 2: Phone display span -->
+  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+    <strong>Session:</strong>
+    <span class="sid" id="sid-display">—</span>
     <span id="user-phone-display"
-      style="font-size:.78rem;color:var(--blue);font-weight:600;margin-left:4px;background:var(--blue-faint);padding:2px 8px;border-radius:6px">
+      style="font-size:.75rem;color:var(--blue);font-weight:600;
+             background:var(--blue-faint);padding:2px 8px;border-radius:6px">
     </span>
-    <div class="sbar-actions">
-      <!-- <button class="pill-btn outline" onclick="copyThreadId()">📋 Copy ID</button> -->
-      <button class="pill-btn primary" onclick="newSession()">＋ New Session</button>
-      <!-- CHANGE 2: Logout button -->
-      <button class="pill-btn danger" onclick="logout()">Logout</button>
-    </div>
   </div>
+  <div class="sbar-actions">
+    <button class="pill-btn outline" onclick="copyThreadId()">📋 Copy ID</button>
+    <button class="pill-btn primary" onclick="newSession()">＋ New Session</button>
+    <button class="pill-btn danger"  onclick="logout()">Logout</button>
+  </div>
+</div>
 
   <div class="chat-card">
     <div class="msgs" id="msgs"></div>

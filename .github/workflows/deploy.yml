@@ -12,16 +12,21 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
+    - name: Login to ACR
+      uses: docker/login-action@v2
       with:
-        node-version: '22'
+        registry: voxa24registry.azurecr.io
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
 
-    - name: Install dependencies
-      run: npm ci --omit=dev
+    - name: Build and push Docker image
+      run: |
+        docker build -t voxa24registry.azurecr.io/amy-assistant:latest .
+        docker push voxa24registry.azurecr.io/amy-assistant:latest
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'doctor-assistant'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        images: 'voxa24registry.azurecr.io/amy-assistant:latest'

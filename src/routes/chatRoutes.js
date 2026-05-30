@@ -11,7 +11,7 @@ const router = express.Router();
 
 // Chat
 router.post("/chat", handleChat);
-
+ 
 // Appointments — filtered by userPhone
 router.get("/appointments", getAppointments);
 

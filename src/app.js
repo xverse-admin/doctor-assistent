@@ -10,6 +10,8 @@ const adminRoutes  = require("./routes/adminRoutes");
 const { getDb } = require("./utils/database");
 const app = express();
 
+ 
+
 app.use(cors({
   origin: "*",   // allows any website to call Amy
   methods: ["GET", "POST"],

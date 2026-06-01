@@ -26,7 +26,7 @@ COPY . .
 
 # Azure App Service uses PORT env variable (default 8080)
 # We default to 3000 for local dev
-
+ENV PORT=80
 EXPOSE 3000
 
 # Use non-root user for security

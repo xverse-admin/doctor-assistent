@@ -12,20 +12,15 @@ const app = express();
 
  
 
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://localhost:5000",
-    "https://voxa24.com",
-    "https://www.voxa24.com",
-  ],
-  methods: ["GET", "POST", "OPTIONS"],
+const corsOptions = {
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: false,
-}));
+  optionsSuccessStatus: 200,
+};
 
-app.options("*", cors());
+app.use(cors(corsOptions));
+app.options("/*", cors(corsOptions));  // ← handle preflight
 
 // Handle preflight OPTIONS requests
  

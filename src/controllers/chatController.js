@@ -100,17 +100,17 @@ const {
   getSessionsByPhone,
   getSession,
   getAppointmentsByPhone,
+  createPatient,
+  updatePatientContact,
 } = require("../utils/database");
 
 const handleChat = async (req, res) => {
-  // ── phone comes from frontend (set in sessionStorage after Firebase login) ──
   const { message, threadId, userPhone } = req.body;
 
   if (!message || !threadId) {
     return res.status(400).json({ error: "Both 'message' and 'threadId' are required." });
   }
 
-  // Check session timeout
   const isValid = await validateSession(threadId);
   if (!isValid) {
     return res.json({
@@ -121,31 +121,56 @@ const handleChat = async (req, res) => {
 
   await updateSession(threadId);
 
-  // Persist user message — include user_phone so session is linked to the user
   await appendMessageToSession(threadId, {
     role:      "user",
     content:   message,
     timestamp: new Date(),
   });
 
-  // Tag the session document itself with user_phone
   if (userPhone) {
     await upsertSession(threadId, { user_phone: userPhone });
   }
 
   try {
     const config  = { configurable: { thread_id: threadId } };
-    const inputs  = { messages: [new HumanMessage(message)] };
+    const inputs  = { messages: [new HumanMessage(message)], userPhone: userPhone || null };
     const result  = await graph.invoke(inputs, config);
 
     const lastMessage  = result.messages[result.messages.length - 1];
     let responseText   = lastMessage.content;
     let sessionStatus  = "active";
 
-    // Detect booking completion
     const isBooked =
       responseText.toLowerCase().includes("booked") ||
       responseText.toLowerCase().includes("confirmed");
+
+    const isNewPatientRegistered = responseText
+      .toLowerCase()
+      .includes("saved your details as a new patient");
+
+    if (isNewPatientRegistered && userPhone) {
+      try {
+        const regData = result.appointmentData || {};
+        const newPatient = await createPatient({
+          name:       regData.patientName,
+          age:        regData.age,
+          gender:     regData.gender,
+          phone:      userPhone,
+          email:      regData.email,
+          city:       regData.city,
+          conditions: regData.conditions,
+        });
+
+        // Mark registration complete AND set this new patient as the active
+        // profile for the session (handles both first-time and new-family-member cases)
+        await graph.updateState(config, {
+          appointmentData: { patientRegistered: true, registeringNewFamilyMember: false },
+          activePatientId: String(newPatient._id),
+        });
+      } catch (e) {
+        console.error("[ChatController] Failed to save new patient:", e.message);
+      }
+    }
 
     if (isBooked) {
       responseText  += "\n\n(Session complete. Start a new session anytime!)";
@@ -154,24 +179,31 @@ const handleChat = async (req, res) => {
 
       try {
         const apptData = result.appointmentData || {};
-        if (apptData.name || apptData.email || apptData.date) {
+        const patientName = apptData.patientName || (result.patientRecord && result.patientRecord.name) || null;
+
+        if (patientName || apptData.email || apptData.date) {
           await saveAppointment({
-            thread_id:  threadId,
-            user_phone: userPhone || null,   // ← link appointment to phone
-            name:       apptData.name,
-            email:      apptData.email,
-            date:       apptData.date,
-            time:       apptData.time,
-            status:     "confirmed",
+            thread_id:   threadId,
+            user_phone:  userPhone || null,
+            name:        patientName,
+            doctor_name: apptData.doctorName || null,
+            doctor_id:   apptData.doctorId || null,
+            email:       apptData.email || (result.patientRecord && result.patientRecord.email) || null,
+            date:        apptData.date,
+            time:        apptData.time,
+            status:      "confirmed",
             response_text: responseText,
           });
         }
+
+        if (userPhone && apptData.email) {
+          await updatePatientContact(userPhone, { email: apptData.email });
+        }
       } catch (e) {
-        console.error("[ChatController] Failed to save appointment:", e.message);
+        console.error("[ChatController] Failed to save appointment or backfill email:", e.message);
       }
     }
 
-    // Persist assistant response
     await appendMessageToSession(threadId, {
       role:      "assistant",
       content:   responseText,
@@ -186,7 +218,6 @@ const handleChat = async (req, res) => {
   }
 };
 
-// ── GET /sessions — returns only THIS user's sessions ─────────────────────────
 const getSessions = async (req, res) => {
   try {
     const { userPhone } = req.query;
@@ -196,13 +227,11 @@ const getSessions = async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
-// ── GET /sessions/:threadId — only if it belongs to this user ─────────────────
 const getSessionById = async (req, res) => {
   try {
     const { userPhone } = req.query;
     const session = await getSession(req.params.threadId);
     if (!session) return res.status(404).json({ error: "Session not found." });
-    // Security check — session must belong to the requesting user
     if (userPhone && session.user_phone && session.user_phone !== userPhone) {
       return res.status(403).json({ error: "Access denied." });
     }
@@ -210,7 +239,6 @@ const getSessionById = async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 };
 
-// ── GET /appointments — returns only THIS user's appointments ─────────────────
 const getAppointments = async (req, res) => {
   try {
     const { userPhone } = req.query;

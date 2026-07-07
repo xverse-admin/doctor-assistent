@@ -1,6 +1,4 @@
-// // src/utils/database.js
-// // MongoDB connection & collections for Amy Assistant
-
+ 
 // const { MongoClient, ObjectId } = require("mongodb");
 
 // let client = null;
@@ -20,15 +18,18 @@
 //   await client.connect();
 //   db = client.db(process.env.MONGODB_DB_NAME || "amy_assistant");
 
-//   // Create indexes
+//   // Indexes
 //   await db.collection("medical_reports").createIndex({ thread_id: 1 });
+//   await db.collection("medical_reports").createIndex({ user_phone: 1 });   // ← NEW
 //   await db.collection("medical_reports").createIndex({ created_at: -1 });
 //   await db.collection("chat_sessions").createIndex({ thread_id: 1 }, { unique: true });
+//   await db.collection("chat_sessions").createIndex({ user_phone: 1 });     // ← NEW
 //   await db.collection("chat_sessions").createIndex({ updated_at: -1 });
 //   await db.collection("appointments").createIndex({ thread_id: 1 });
+//   await db.collection("appointments").createIndex({ user_phone: 1 });      // ← NEW
 //   await db.collection("appointments").createIndex({ appointment_date: 1 });
 
-//   // Indexes for knowledge base collections
+//   // Knowledge base indexes
 //   await db.collection("doctors").createIndex({ specialization: 1 });
 //   await db.collection("faqs").createIndex({ tags: 1 });
 //   await db.collection("faqs").createIndex({ question: "text", answer: "text", tags: "text" });
@@ -44,7 +45,7 @@
 //   if (client) { await client.close(); client = null; db = null; }
 // };
 
-// // ─── medical_reports ─────────────────────────────────────────────────────────
+// // ─── medical_reports ──────────────────────────────────────────────────────────
 // const saveReport = async (data) => {
 //   const database = await getDb();
 //   const doc = { ...data, created_at: new Date() };
@@ -54,13 +55,35 @@
 
 // const getReportsByThread = async (threadId) => {
 //   const database = await getDb();
-//   return database.collection("medical_reports").find({ thread_id: threadId }).sort({ created_at: -1 }).toArray();
+//   return database.collection("medical_reports")
+//     .find({ thread_id: threadId })
+//     .sort({ created_at: -1 })
+//     .toArray();
+// };
+
+// // ── NEW: get reports by phone (only this user's reports) ──────────────────────
+// const getReportsByPhone = async (userPhone, limit = 50) => {
+//   const database = await getDb();
+//   return database.collection("medical_reports")
+//     .find({ user_phone: userPhone })
+//     .project({
+//       thread_id:      1,
+//       filename:       1,
+//       mime_type:      1,
+//       created_at:     1,
+//       extracted_text: 1,
+//       image_url:      1,
+//       image_base64:   1,
+//       user_phone:     1,
+//     })
+//     .sort({ created_at: -1 })
+//     .limit(limit)
+//     .toArray();
 // };
 
 // const getAllReports = async (limit = 50) => {
 //   const database = await getDb();
-//   return database
-//     .collection("medical_reports")
+//   return database.collection("medical_reports")
 //     .find({})
 //     .project({
 //       thread_id:      1,
@@ -68,8 +91,9 @@
 //       mime_type:      1,
 //       created_at:     1,
 //       extracted_text: 1,
-//       image_url:      1,   // Cloudinary URL
-//       image_base64:   1,   // fallback only
+//       image_url:      1,
+//       image_base64:   1,
+//       user_phone:     1,
 //     })
 //     .sort({ created_at: -1 })
 //     .limit(limit)
@@ -81,7 +105,10 @@
 //   const database = await getDb();
 //   return database.collection("chat_sessions").findOneAndUpdate(
 //     { thread_id: threadId },
-//     { $set: { updated_at: new Date(), ...update }, $setOnInsert: { thread_id: threadId, created_at: new Date() } },
+//     {
+//       $set:         { updated_at: new Date(), ...update },
+//       $setOnInsert: { thread_id: threadId, created_at: new Date() },
+//     },
 //     { upsert: true, returnDocument: "after" }
 //   );
 // };
@@ -90,7 +117,11 @@
 //   const database = await getDb();
 //   return database.collection("chat_sessions").updateOne(
 //     { thread_id: threadId },
-//     { $push: { messages: message }, $set: { updated_at: new Date() }, $setOnInsert: { thread_id: threadId, created_at: new Date() } },
+//     {
+//       $push:        { messages: message },
+//       $set:         { updated_at: new Date() },
+//       $setOnInsert: { thread_id: threadId, created_at: new Date() },
+//     },
 //     { upsert: true }
 //   );
 // };
@@ -104,7 +135,19 @@
 //   const database = await getDb();
 //   return database.collection("chat_sessions")
 //     .find({}, { projection: { messages: 0 } })
-//     .sort({ updated_at: -1 }).limit(limit).toArray();
+//     .sort({ updated_at: -1 })
+//     .limit(limit)
+//     .toArray();
+// };
+
+// // ── NEW: get sessions by phone (only this user's sessions) ────────────────────
+// const getSessionsByPhone = async (userPhone, limit = 50) => {
+//   const database = await getDb();
+//   return database.collection("chat_sessions")
+//     .find({ user_phone: userPhone }, { projection: { messages: 0 } })
+//     .sort({ updated_at: -1 })
+//     .limit(limit)
+//     .toArray();
 // };
 
 // // ─── appointments ─────────────────────────────────────────────────────────────
@@ -117,18 +160,32 @@
 
 // const getAppointmentsByThread = async (threadId) => {
 //   const database = await getDb();
-//   return database.collection("appointments").find({ thread_id: threadId }).sort({ created_at: -1 }).toArray();
+//   return database.collection("appointments")
+//     .find({ thread_id: threadId })
+//     .sort({ created_at: -1 })
+//     .toArray();
 // };
 
 // const getAllAppointments = async (limit = 50) => {
 //   const database = await getDb();
-//   return database.collection("appointments").find({}).sort({ created_at: -1 }).limit(limit).toArray();
+//   return database.collection("appointments")
+//     .find({})
+//     .sort({ created_at: -1 })
+//     .limit(limit)
+//     .toArray();
 // };
 
+// // ── NEW: get appointments by phone (only this user's appointments) ─────────────
+// const getAppointmentsByPhone = async (userPhone, limit = 50) => {
+//   const database = await getDb();
+//   return database.collection("appointments")
+//     .find({ user_phone: userPhone })
+//     .sort({ created_at: -1 })
+//     .limit(limit)
+//     .toArray();
+// };
 
-
-// // ─── knowledge base queries (doctors / faqs / services / patients) ───────────
-
+// // ─── knowledge base ───────────────────────────────────────────────────────────
 // const getDoctors = async (filter = {}) => {
 //   const database = await getDb();
 //   return database.collection("doctors").find(filter).toArray();
@@ -149,7 +206,6 @@
 
 // const searchFaqs = async (keywords) => {
 //   const database = await getDb();
-//   // Search across question, answer, tags and category
 //   return database.collection("faqs").find({
 //     $or: [
 //       { question: { $regex: keywords, $options: "i" } },
@@ -168,22 +224,25 @@
 
 // const getPatientByEmail = async (email) => {
 //   const database = await getDb();
-//   return database.collection("patients").findOne({ email: { $regex: email, $options: "i" } });
+//   return database.collection("patients").findOne({
+//     email: { $regex: email, $options: "i" }
+//   });
 // };
 
 // const getAppointmentsByPatientEmail = async (email) => {
 //   const database = await getDb();
 //   return database.collection("appointments")
 //     .find({ patient_email: { $regex: email, $options: "i" } })
-//     .sort({ appointment_date: -1 }).limit(10).toArray();
+//     .sort({ appointment_date: -1 })
+//     .limit(10)
+//     .toArray();
 // };
 
 // module.exports = {
 //   getDb, closeDb,
-//   saveReport, getReportsByThread, getAllReports,
-//   upsertSession, appendMessageToSession, getSession, getAllSessions,
-//   saveAppointment, getAppointmentsByThread, getAllAppointments,
-//   // knowledge base
+//   saveReport, getReportsByThread, getReportsByPhone, getAllReports,
+//   upsertSession, appendMessageToSession, getSession, getAllSessions, getSessionsByPhone,
+//   saveAppointment, getAppointmentsByThread, getAppointmentsByPhone, getAllAppointments,
 //   getDoctors, getDoctorBySpecialization,
 //   getFaqs, searchFaqs,
 //   getServices,
@@ -423,6 +482,52 @@ const getPatientByEmail = async (email) => {
   });
 };
 
+const createPatient = async (data) => {
+  const database = await getDb();
+  const doc = {
+    patient_id: `PT${Date.now().toString().slice(-7)}`,
+    name:    data.name,
+    age:     data.age ? Number(data.age) : null,
+    gender:  data.gender,
+    phone:   data.phone,
+    email:   data.email || null,
+    address: data.city || null,
+    medical_history: {
+      conditions: data.conditions ? [data.conditions] : ["None"],
+      allergies: ["None"],
+      current_medications: [],
+    },
+    registered_at: new Date(),
+  };
+  const result = await database.collection("patients").insertOne(doc);
+  return { ...doc, _id: result.insertedId };
+};
+
+const updatePatientContact = async (phone, { email, age, gender, city }) => {
+  const database = await getDb();
+  const setFields = {};
+  if (email)  setFields.email   = email;
+  if (age)    setFields.age     = Number(age);
+  if (gender) setFields.gender  = gender;
+  if (city)   setFields.address = city;
+
+  if (Object.keys(setFields).length === 0) return null;
+
+  return database.collection("patients").updateOne(
+    { phone },
+    { $set: setFields }
+  );
+};
+
+const getPatientsByPhone = async (phone) => {
+  const database = await getDb();
+  const cleanPhone = phone.replace(/[\s\-()]/g, "");
+  const last10 = cleanPhone.slice(-10);
+  return database.collection("patients")
+    .find({ phone: { $regex: last10 + "$", $options: "i" } })
+    .toArray();
+};
+
 const getAppointmentsByPatientEmail = async (email) => {
   const database = await getDb();
   return database.collection("appointments")
@@ -440,5 +545,8 @@ module.exports = {
   getDoctors, getDoctorBySpecialization,
   getFaqs, searchFaqs,
   getServices,
+  getPatientsByPhone,
+  createPatient,
+  updatePatientContact,
   getPatientByEmail, getAppointmentsByPatientEmail,
 };

@@ -2,8 +2,9 @@
 const { MemorySaver }       = require("@langchain/langgraph");
 const { StateGraph, END }   = require("@langchain/langgraph");
 const { ToolNode }          = require("@langchain/langgraph/prebuilt");
-const { AgentState }        = require("./state");
 
+const { AgentState }        = require("./state");
+const { identifyPatientNode } = require("../agents/identifyPatient");
 const { orchestratorNode }   = require("../agents/orchestrator");
 const { doctorNode }         = require("../agents/doctor");
 const { availabilityNode }   = require("../agents/availability");
@@ -24,10 +25,12 @@ workflow.addNode("doctor_assistant", doctorNode);
 workflow.addNode("check_availability", availabilityNode);
 workflow.addNode("booking_agent",    bookingNode);
 workflow.addNode("knowledge_query",  knowledgeBaseNode);
+workflow.addNode("identify_patient", identifyPatientNode);
 workflow.addNode("tools",            new ToolNode(tools));
 
 // Entry
-workflow.addEdge("__start__", "orchestrator");
+workflow.addEdge("__start__", "identify_patient");
+workflow.addEdge("identify_patient", "orchestrator");
 
 // Orchestrator → correct agent
 workflow.addConditionalEdges(

@@ -10,18 +10,39 @@ const AgentState = Annotation.Root({
     reducer: (x, y) => y,
     default: () => "orchestrator",
   }),
-  // Update this section to include all user details you want to capture
-  appointmentData: Annotation({
-    reducer: (x, y) => ({ ...x, ...y }), // This merges new data into existing data
-    default: () => ({
-      name: null,       
-      //phone: null,      
-      email: null,
-      date: null,
-      time: null,
-      //reason: null,
-    }),
+  userPhone: Annotation({
+    reducer: (x, y) => y ?? x,
+    default: () => null,
   }),
+  patientRecord: Annotation({
+    reducer: (x, y) => (y !== undefined ? y : x),
+    default: () => undefined, // undefined = not looked up yet, null = looked up, not found
+  }),
+  patientRecords: Annotation({
+  reducer: (x, y) => (y !== undefined ? y : x),
+  default: () => undefined, // undefined = not looked up yet
+}),
+activePatientId: Annotation({
+  reducer: (x, y) => y ?? x,
+  default: () => null,
+}),
+ appointmentData: Annotation({
+  reducer: (x, y) => ({ ...x, ...y }),
+  default: () => ({
+    patientName: null,
+    doctorName:  null,
+    doctorId:    null,
+    email:       null,
+    date:        null,
+    time:        null,
+    age:         null,
+    gender:      null,
+    city:        null,
+    conditions:  null,
+    patientRegistered: false,
+    bookingIntent: false,
+  }),
+}),
 });
 
 module.exports = { AgentState };
